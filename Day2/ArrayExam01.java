@@ -65,11 +65,11 @@ public class ArrayExam01 {
 		System.out.println("이름과 국어,영어,수학 순서대로 입력해주세요.");
 
 		for(int i=0; i<cnt; i++) { //2명이면, 0,1
-			System.out.println(scoName[0]+" Name : ");
+			System.out.println(scoName[0]+"  : ");
 			name[i] = sc.next(); 
 			
 			for(int j=0; j<3 ; j++) { //과목수는 3개. 0,1,2 실행.
-			System.out.println(scoName[i+1]+" Score : ");
+			System.out.println(scoName[j+1]+" Score : ");
 				score[i][j] = sc.nextInt();
 			}
 			
