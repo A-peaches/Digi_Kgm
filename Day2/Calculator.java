@@ -7,6 +7,7 @@ public class Calculator {
 
 		Scanner sc = new Scanner(System.in);
 		Calculator calc = new Calculator();
+		
 		char my_continue;
 
 		do {
