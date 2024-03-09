@@ -85,30 +85,22 @@ public class AllStudent {
 					 stuArray[idx[0]].getMat()+'\t'+
 					 stuArray[idx[0]].getTotal()+'\t'+
 					 stuArray[idx[0]].getAvg()+'\n');
-			} else {
-				System.out.println("평균 몇점 이상의 학생을 조회할까요?");
-				int avgScore = sc.nextInt();
-				
-				for (int i=0; i<num; i++) {
-					if(stuArray[i].getAvg() >= avgScore ){
-						idx[0] = i;
-					} else 
-						continue;
-				
 			}
 		}
-
-		
-
-		
-		
-
-		
-
 	}
+//			} else {
+//				System.out.println("평균 몇점 이상의 학생을 조회할까요?");
+//				int avgScore = sc.nextInt();
+//				
+//				for (int i=0; i<num; i++) {
+//					if(stuArray[i].getAvg() >= avgScore ){
+//						idx[0] = i;
+//					} else 
+//						continue;
+//				
+//			}
+//		}
 
-	
-}
-
+		
 
 
