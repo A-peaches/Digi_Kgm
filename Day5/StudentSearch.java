@@ -17,19 +17,29 @@ public class StudentSearch {
 			case 1:
 				allstu.addData();
 				break;
+			case 2:
+				allstu.updateData();
+				break;
 			case 3:
 				allstu.search();
 				break;
 			case 4:
 				allstu.viewData();
 				break;
+			case 5:
+				num = 5;
+				break;
 			default:
-				System.out.println("프로그램을 종료합니다.");
+				System.out.println("1 ~ 4의 숫자로 입력해주세요.");
 				num = 5;
 				break;
 		}
 		
+		
 			
 		}while(num != 5);
+		System.out.println("프로그램을 종료합니다.");
+		
+		
 	}
 }
