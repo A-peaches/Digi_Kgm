@@ -7,7 +7,7 @@ public class AllStudent {
 	private StudentScoreHasA[] stuArray; // 여러명의 학생을 담을 배열.
 	private int num; // 담은 학생 수를 저장할 변수.
 	Scanner sc = new Scanner(System.in);
-
+	
 	// Constructor
 	// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 sutArray를 생성한다.
 	// 매개변수 생성자는 허용되지않는다.
@@ -163,6 +163,4 @@ public class AllStudent {
 		} while (true);
 	}
 }
-
 				
-

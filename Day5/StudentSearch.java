@@ -30,8 +30,7 @@ public class StudentSearch {
 				num = 5;
 				break;
 			default:
-				System.out.println("1 ~ 4의 숫자로 입력해주세요.");
-				num = 5;
+				System.out.println("1 ~ 5의 숫자로 입력해주세요.");
 				break;
 		}
 		
