@@ -124,7 +124,7 @@ public class Employee {
 	}
 
 	public void EmployeeTemp(Position position) { //position 입력시 temp자동입력
-		if (position.getPosition().equals("주임") | 
+		if (position.getPosition().equals("주임") || 
 			position.getPosition().equals("임원")) {
 			temp = 1;
 		}

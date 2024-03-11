@@ -4,23 +4,21 @@ import java.util.Scanner;
 
 public class SalaryList {
 	Employee []employeeList = new Employee[100];
-	Employee emlployee;
 	Scanner sc = new Scanner(System.in);
 	int num = 0;
 	//constructor 생략
 	
-	public void mainDisplay() {
+	public void mainDisplay() { // main 화면
 		System.out.println("============ 직원 급여 관리 프로그램 ============" + '\n'+
 						   "1. 직원 정보 입력" +'\n' +
 						   "2. 직원 수정" + '\n' +
 						   "3. 직원 검색" + '\n' +
 						   "4. 직원 출력" + '\n' +
 						   "5. 종료" + '\n' +
-						   "6. 삭제" + '\n' +
 						   "==========================================");
 	}
 	
-	public void input() {
+	public void input() {	//필수적인 정보를 입력받고 Employee 객체 생성 후 배열에 담음.
 	   //나머지는 자동계산, 필수입력 사번,  이름, 직급, 입사일자, 성과지표
 		//(int employeeNum, String name, String position,String hireDate, String kpi,overtime) 
 		
@@ -36,12 +34,13 @@ public class SalaryList {
 		String kpi = sc.next();
 		System.out.println("시간외 근무(분)단위로 입력해주세요.");
 		int overtime = sc.nextInt();
+		
 		employeeList[num] = new Employee(employeeNum, name, position, hireDate, kpi, overtime);
-		num++;
+		num++; //총 직원수 증가
 		
 	}
 	
-	public void viewInfo(int i) {
+	public void viewInfo(int i) { //i 인덱스에 해당하는 직원 출력
 		System.out.println(employeeList[i].getEmployeeNum()+'\t'+
 						   employeeList[i].getName() +'\t' +
 						   employeeList[i].getTemp() +'\t' +
@@ -133,7 +132,7 @@ public class SalaryList {
 					while (updateNum != 4) {
 						System.out.println("수정할 항목을 입력해주세요." + '\n' 
 										  + "1. 직급" + '\t' + "2. 성과점수 " + '\n' 
-										  + "3. 시간외근무" + '\t' + "4. 다른 학생 수정"+'\n');
+										  + "3. 시간외근무" + '\t' + "4. 다른 직원 수정"+'\n');
 						updateNum = sc.nextInt();
 						switch (updateNum) {
 						case 1:

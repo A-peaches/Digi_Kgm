@@ -10,21 +10,20 @@ public class SalaryManagement {
 		Scanner sc = new Scanner(System.in);
 		
 		do {		
-
-			salaryList.mainDisplay();
+			salaryList.mainDisplay(); // 초기화면
 			selectNum = sc.nextInt();
 			switch(selectNum) {
 			case 1:
-				salaryList.input();
+				salaryList.input(); //입력메서드
 				break;
 			case 2:
-				salaryList.update();
+				salaryList.update(); //수정메서드
 				break;
 			case 3:
-				salaryList.search();
+				salaryList.search(); //검색메서드
 				break;
 			case 4:
-				salaryList.allView();
+				salaryList.allView(); //조회메서드
 				break;
 			case 5:
 				selectNum = 5;
