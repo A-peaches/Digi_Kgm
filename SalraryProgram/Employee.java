@@ -18,7 +18,7 @@ public class Employee {
 	private double tax;
 	
 	//constructor
-	//나머지는 자동계산, 필수입력 사번,  이름, 직급, 입사일자, 성과지표
+	//나머지는 자동계산, 필수입력 사번,  이름, 직급, 입사일자, 성과지표, 시간외근무(분)
 	public Employee() {
 	}
 	

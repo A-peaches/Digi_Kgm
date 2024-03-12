@@ -8,7 +8,7 @@ public class SalaryList {
 	int num = 0;
 	//constructor 생략
 	
-	public void mainDisplay() { // main 화면
+	public void mainDisplay() { // main 화면 (=Home화면)
 		System.out.println("============ 직원 급여 관리 프로그램 ============" + '\n'+
 						   "1. 직원 정보 입력" +'\n' +
 						   "2. 직원 수정" + '\n' +
@@ -51,7 +51,7 @@ public class SalaryList {
 						   employeeList[i].getOverTime());
 	}
 	
-	public void viewPayInfo(int i) {
+	public void viewPayInfo(int i) { //직원별 급여 정보 출력
 		employeeList[i].salaryResult(); // 급여 계산
 		 // 사번      기본급     호봉급     성과금     시간외수당      세율      세전     세후
 		System.out.println(employeeList[i].getEmployeeNum()+'\t'+
@@ -64,8 +64,7 @@ public class SalaryList {
 						   employeeList[i].getSalary() +'\t');
 	}
 
-	
-	public void search() {
+	public void search() { //1.직원 인사정보 조회 2. 직원 급여명세서 조회
 
 		System.out.println("1. 직원 인사 정보 조회  2. 직원 급여명세서 조회");
 		int type = sc.nextInt();
@@ -102,16 +101,15 @@ public class SalaryList {
 		}
 	}
 
-	public void allView() {
+	public void allView() { //모든 직원 인사정보 출력
 		System.out.println("=========================================================================" +'\n'+
 		 		   "  사번    이름   비정규직    직급       입사일자      근속연수    성과점수   시간외근무(분)" + '\n');
 		for (int i =0; i<num; i++) {
 			viewInfo(i);
 		}
 	}
-	
-	
-	public void update() {
+		
+	public void update() { //필수 요소중 변할수있는 직급,성과점수,시간외(분) 수정기능
 		int updateNum = 0;
 		String prevStr = "";
 		int prevInt = 0;
