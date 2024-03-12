@@ -1,8 +1,8 @@
 package SalraryProgram;
 
 public class Kpi {
-	private String kpi;
-	private double kpiRate;
+	private String kpi; //성과:탁월,우수,양호,보통,미흡
+	private double kpiRate; //성과점수에 따른 성과지급률
 	
 	//constructor
 	public Kpi() {

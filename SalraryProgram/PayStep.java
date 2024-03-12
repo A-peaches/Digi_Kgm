@@ -1,10 +1,10 @@
 package SalraryProgram;
 
 public class PayStep {
-	private int payStep;
-	private int stepSalary;
-	private int tenure;
-	private String position;
+	private int payStep; //호봉
+	private int stepSalary; //호봉별급여
+	private int tenure; //근속연수
+	private String position; //직급
 	
 	
 	//constuctor
