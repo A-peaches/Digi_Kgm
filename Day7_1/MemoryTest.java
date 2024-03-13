@@ -33,6 +33,7 @@ public class MemoryTest {
 				break;
 			case 4:
 				break;
+				
 			}
 		} while (choice != 4);
 

@@ -8,9 +8,9 @@ public class MyStack extends Memory {
 
 	@Override
 	public void pop() {// First in Last out (FILO)
-		if (getSize() > 0) {
-			super.myPrint(getSize() - 1); // 가장 마지막에 넣은 데이터 출력
-			super.setArr(getSize() - 1, 0); // 빠져나간 데이터 리셋. 초기값 0 할당.
+		if (super.getSize() > 0) {
+			super.myPrint(super.getSize() - 1); // 가장 마지막에 넣은 데이터 출력
+			super.setArr(super.getSize() - 1, 0); // 빠져나간 데이터 리셋. 초기값 0 할당.
 
 			super.sizeRed(); // size 1감소.
 		} else {

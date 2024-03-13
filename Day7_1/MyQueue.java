@@ -8,7 +8,7 @@ public class MyQueue extends Memory {
 	
 	@Override
 	public void pop() {//First in First out. (FIFO)
-		if (getSize() > 0) {
+		if (super.getSize() > 0) {
 		super.myPrint(0); //무조건 가장 처음에 들어간 값 반환.
 		queueReset();
 		super.sizeRed();
@@ -19,8 +19,8 @@ public class MyQueue extends Memory {
 	
 	public void queueReset() {
 		
-		for (int i=0 ; i < getSize()-1; i++){
-			super.setArr(i,getArr(i+1)); 
+		for (int i=0 ; i < super.getSize()-1; i++){
+			super.setArr(i,super.getArr(i+1)); 
 			// 만약 size가 3이라면, 
 			//0위치에 1을넣고, 1위치에 2를넣고, 끝~!
 		}
