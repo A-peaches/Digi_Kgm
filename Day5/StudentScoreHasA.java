@@ -85,6 +85,14 @@ public class StudentScoreHasA {
 		return avg;
 	}
 
+	public void print() {
+		System.out.println(getName()+'\t'+
+		 getKor()+'\t'+
+		 getEng()+'\t'+
+		 getMat()+'\t'+
+		 getTotal()+'\t'+
+		 getAvg());
+	}
 	
 
 
