@@ -9,7 +9,7 @@ public class AllStudent implements ProgramFunction {
 	StudentScoreHasA pointer;
 	
 // Constructor
-// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 sutArray를 생성한다.
+// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 stuArray를 생성한다.
 // 매개변수 생성자는 허용되지않는다.
 	public AllStudent() {
 		 st = new HashSet<StudentScoreHasA>();
@@ -151,7 +151,7 @@ public class AllStudent implements ProgramFunction {
 //	int idx = 0;
 //	
 //// Constructor
-//// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 sutArray를 생성한다.
+//// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 stuArray를 생성한다.
 //// 매개변수 생성자는 허용되지않는다.
 //	public AllStudent() {
 //		 st = new HashMap<Integer,StudentScoreHasA>();
@@ -295,7 +295,7 @@ public class AllStudent implements ProgramFunction {
 //	List<StudentScoreHasA> st;
 //	 
 //	// Constructor
-//	// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 sutArray를 생성한다.
+//	// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 stuArray를 생성한다.
 //	// 매개변수 생성자는 허용되지않는다.
 //	public AllStudent() {
 //		st = new ArrayList<StudentScoreHasA>();
