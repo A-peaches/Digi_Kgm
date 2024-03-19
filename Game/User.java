@@ -1,4 +1,4 @@
-package BaseballGame;
+package Game;
 
 import java.util.ArrayList;
 import java.util.List;

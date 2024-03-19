@@ -1,4 +1,4 @@
-package BaseballGame;
+package Game;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,6 +130,21 @@ public class Program2 {
 			strike = 0;
 
 		} while (true);
+	}
+	
+	public void gameStart() {
+		while (true) {
+			int game = question();
+			int num = 0;
+
+			do {
+				setPc(); // pc가 랜덤숫자만들기
+				match(); // 무한루프 ~
+				num++;
+			} while (game != num);
+
+			getAverage();
+		}
 	}
 
 }
