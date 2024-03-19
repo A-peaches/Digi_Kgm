@@ -20,16 +20,16 @@ public class PlayGame {
 
 			switch (choice) {
 			case 1:
-				bg.gameStart();
+				bg.gameStart(); //야구게임!
 				break;
 			case 2:
-				sm.gameStart();
+				sm.gameStart(); //작은 수 변경게임!
 				break;
 			case 3:
-				sn.gameStart();
+				sn.gameStart(); //정돈된 수 게임!
 				break;
 			case 4:
-				bj.gameStart();
+				bj.gameStart(); //베이비진 게임!
 				break;
 			case 5:
 				System.out.println("========== 게임을 종료합니다 ===========");
