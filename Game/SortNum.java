@@ -30,10 +30,11 @@ public class SortNum {
 		boolean result = false;
 
 		for (int j = 0; j < temp.length() - 1; j++) {
-			if (temp.charAt(j) < temp.charAt(j + 1)) {
+			if (temp.charAt(j) < temp.charAt(j + 1)) { 
+				//숫자길이만큼 반복! 왼쪾으로부터 첫번째 숫자가 다음숫자보다 작을때만 반복.
 				result = true;
 			} else {
-				result = false;
+				result = false; //왼쪾이 더크면 false반환 후 종료.
 				break;
 			}
 		}
@@ -41,13 +42,14 @@ public class SortNum {
 		return result;
 	}
 
-	public void sortNum() {
+	public void sortNum() { //시작값부터 종료값까지 반복!
 		for (int i = getStartNum(); i < getEndNum(); i++) {
 			String temp = String.valueOf(i);
+			// 숫자를 String으로 변환.
 
 			if (compare(temp.length(), temp)) {
-				System.out.println(temp);
-				addNum();
+				System.out.println(temp); //비교 후 true일떄 출력!
+				addNum(); //숫자 총개수 계산!
 			}
 		}
 	}
@@ -78,13 +80,15 @@ public class SortNum {
 	public void gameStart() {
 		while (true) {
 			System.out.println("===========정돈된 수 구하기 게임=========");
-			inputNum();
-			sortNum();
-			printNum();
+			inputNum(); // 시작값 종료값 입력받기~
+			sortNum(); // 정돈된 수만 출력!
+			printNum(); // 총 숫자 출력.
 
 			System.out.println("계속 하시겠습니까? <1-yes / 2-no>");
 			if (sc.nextInt() == 2) {
 				break;
+			} else {
+				num = 0; //계속한다하면 숫자 카운트 초기화
 			}
 		}
 	}

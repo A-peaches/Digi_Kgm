@@ -30,16 +30,16 @@ public class User {
 	public void userAnswer() { 
 		System.out.println("숫자 3자리를 입력해주세요. : "); 
 		
-		while (answer.size() < 3) {
-			int num = sc.nextInt(10);
-			if (!answer.contains(num)) { 
-				answer.add(num);
+		while (answer.size() < 3) { // 3자리까지만 받음
+			int num = sc.nextInt(10); // 숫자한개씩
+			if (!answer.contains(num)) {  
+				answer.add(num); //중복된값이 있으면 다시 입력필수
 			} else {
 				System.out.println("중복된 값은 허용되지않습니다. 다시 입력해주세요!");
 				continue;
 			}
 		} 
-		 // 입력할때마다 횟수 증가
+
 	}
 	
 	
