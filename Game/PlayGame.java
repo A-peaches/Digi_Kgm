@@ -31,7 +31,7 @@ public class PlayGame {
 			case 4:
 				bj.gameStart(); //베이비진 게임!
 				break;
-			case 5:
+			case 5: // switch문  while문 전부 탈출 
 				System.out.println("========== 게임을 종료합니다 ===========");
 				return;
 			}
