@@ -18,9 +18,9 @@ public class StudentManagement {
 			case 1:
 				allstu.addData();
 				break;
-//			case 2:
-//				allstu.updateData();
-//				break;
+			case 2:
+				allstu.updateData();
+				break;
 			case 3:
 				allstu.selectView();
 				break;
@@ -28,13 +28,16 @@ public class StudentManagement {
 				allstu.allView();
 				break;
 			case 5:
-				num = 5;
+				allstu.deleteData();
+				break;
+			case 6:
+				num = 6;
 				break;
 			default:
-				System.out.println("1 ~ 5의 숫자로 입력해주세요.");
+				System.out.println("1 ~ 6의 숫자로 입력해주세요.");
 				break;
 			}
-		} while (num != 5);
+		} while (num != 6);
 		System.out.println("프로그램을 종료합니다.");
 
 	}
