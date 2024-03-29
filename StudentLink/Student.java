@@ -13,6 +13,7 @@ public class Student {
 	private float avg;
 	private int total;
 	Student next;
+
 	
 	//constructor
 	public Student() {
