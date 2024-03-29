@@ -1,7 +1,7 @@
 package StudentLink;
 
 import java.util.*;
-
+import java.sql.*;
 import Day14.LinkNode;
 
 
@@ -13,11 +13,36 @@ public class AllStudent implements ProgramFunction{
 	Student cur;
 	Student del;
 	Student prev;
-	
+	Connection conn;
+	PreparedStatement pstmt;
 	// Constructor
 	// 모든 학생을 관리할 수 있는 객체 생성시, 모든학생들을 담을 stuArray를 생성한다.
 	// 매개변수 생성자는 허용되지않는다.
-	public AllStudent() {
+	public AllStudent() throws SQLException {
+		//DB연동
+		try {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?serverTimezone=UTC",
+				"root","qwe123!@#");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		String sql = "select * from stu";
+		pstmt = conn.prepareStatement(sql);
+		ResultSet rs = pstmt.executeQuery();
+		
+		while(rs.next()) {
+			//1은 auto auto_increment임.
+			String name = rs.getString(2);
+			int kor = rs.getInt(3);
+			int eng = rs.getInt(4);
+			int mat = rs.getInt(5);
+			
+			roadData(name,kor,eng,mat);
+		}
 	}
 
 	
@@ -31,7 +56,25 @@ public class AllStudent implements ProgramFunction{
 				+ '\n' + "5. 학생 성적 삭제" + '\n' + "6. 프로그램 종료 " + '\n'
 				+ "=================================================");
 	}
-
+	public void roadData(String name, int kor, int eng, int mat) {
+		if(head == null) {
+			newSt = new Student();
+			newSt.setName(name);
+			newSt.setKor(kor);
+			newSt.setEng(eng);
+			newSt.setMat(mat);
+			head = cur = newSt; 
+			newSt.next = null;
+		
+		} else {
+			newSt = new Student();
+			newSt.setName(name);
+			newSt.setKor(kor);
+			newSt.setEng(eng);
+			newSt.setMat(mat);
+			insertAdd();
+		}
+	}
 	@Override
 	public void addData() {
 		if(head == null) {
@@ -218,7 +261,49 @@ public class AllStudent implements ProgramFunction{
 			}
 		} while (true);
 	}
-
+	public void push() throws SQLException {
+		cur = head;
+		while (cur != null) {
+			String sql = "select name from stu where name=?";
+			pstmt= conn.prepareStatement(sql);
+			
+			pstmt.setString(1,cur.getName());
+			ResultSet rs = pstmt.executeQuery();
+			//이름같은거있는지조회.
+			
+			boolean match = false;
+			if (rs.next()) {
+			    // 현재 행의 'name' 컬럼 값을 가져옴
+			    String dbName = rs.getString("name");
+			    // 데이터베이스에서 조회한 이름과 cur 객체의 이름 비교
+			    if (dbName.equals(cur.getName())) {
+			        match = true;
+			        // 이름이 일치할 때 원하는 작업 수행
+			    }
+			}
+			
+			if(!match) {
+				try {
+					String sql2 = "insert into stu values(null,?,?,?,?,?,?)";
+					pstmt = conn.prepareStatement(sql2);
+					
+					pstmt.setString(1, cur.getName());
+					pstmt.setInt(2, cur.getKor());
+					pstmt.setInt(3, cur.getEng());
+					pstmt.setInt(4, cur.getMat());
+					pstmt.setInt(5, cur.getTotal());
+					pstmt.setFloat(6, cur.getAvg());
+					
+					pstmt.executeUpdate();
+					
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			 cur = cur.next;	
+		}
+		
+	}
 	public void selectView() {
 		System.out.println("1. 이름검색  2. 평균 검색");
 		int type = sc.nextInt();
