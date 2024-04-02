@@ -8,6 +8,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -25,9 +29,16 @@ import javax.swing.SwingConstants;
 public class ChatListWindow extends JFrame implements ActionListener {
 	private User thisUser;
 	private JList<ChatRoom> chatRoomList;
+	DefaultListModel<ChatRoom> chatListModel;
 	private JButton btnChatList, btnAddChat, btnSet;
 	private CardLayout cardLayout;
 	private JPanel cardPanel;
+	private String sql;
+	private String roomName;
+	private int roomNum;
+	PreparedStatement pstmt;
+	Connection conn;
+	
 
 	public ChatListWindow(User user) {
 		thisUser = user;
@@ -37,7 +48,8 @@ public class ChatListWindow extends JFrame implements ActionListener {
 		setLocationRelativeTo(null); // 화면 중앙에 위치
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// JVM에서 완전한 창닫기. 닫기버튼 클릭시 창 종료.
-
+		chatListModel = new DefaultListModel<>();
+		
 		cardLayout = new CardLayout();
 		cardPanel = new JPanel(cardLayout);
 
@@ -65,7 +77,7 @@ public class ChatListWindow extends JFrame implements ActionListener {
 		addChatPanel.setLayout(new BorderLayout(10, 10));
 
 		// 채팅방 만들기 라벨
-		JLabel title = new JLabel(" ♥ New Chatting Room ♥");
+		JLabel title = new JLabel(" ♥ New Chatting Room ♥ ");
 		title.setFont(new Font("나눔고딕", Font.PLAIN, 20));
 		addChatPanel.add(title, BorderLayout.NORTH);
 
@@ -98,6 +110,7 @@ public class ChatListWindow extends JFrame implements ActionListener {
 
 		// 입력된 ID들을 보여줄 리스트와 스크롤 팬
 		DefaultListModel<String> listModel = new DefaultListModel<>();
+
 		JList<String> idList = new JList<>(listModel);
 		JScrollPane listScrollPane = new JScrollPane(idList);
 
@@ -115,9 +128,6 @@ public class ChatListWindow extends JFrame implements ActionListener {
 		createBtn.setFont(new Font("나눔고딕", Font.PLAIN, 16));
 		btnPanel.add(createBtn);
 		// 취소 버튼
-		JButton cancelBtn = new JButton("Cancel");
-		cancelBtn.setFont(new Font("나눔고딕", Font.PLAIN, 16));
-		btnPanel.add(cancelBtn);
 
 		addChatPanel.add(btnPanel, BorderLayout.SOUTH);
 
@@ -131,24 +141,88 @@ public class ChatListWindow extends JFrame implements ActionListener {
 			}
 		});
 
+		//방만들기.
 		createBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
-				String roomName = thisUser.getId()+", ";
+				roomName = thisUser.getId()+",";
 				for (int i = 0; i < listModel.size(); i++) {
-					roomName += listModel.get(i)+", ";
+					roomName += listModel.get(i)+",";
 				}
-				ChatRoom ch = new ChatRoom(roomName);
-				System.out.println(ch.getRoomName());
-				 
+				
+				conn = DbConnect.getConn().getDb();
+				sql = "insert into room (room_name) values (?)";
+				try {
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, roomName);
+					pstmt.executeUpdate();//쿼리문실행
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}// 방정보 추가
+					
+				//방금 생 성된 room_num 갖고오기...
+				sql = "select room_num from room where room_name = ?";
+				try {
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, roomName);
+					ResultSet rs = pstmt.executeQuery();
+					
+					//chatRoomList - CHATROOM
+					while (rs.next()) {
+				        roomNum = rs.getInt(1); // 컬럼 이름으로 데이터 가져오기
+
+					}
+				    
+					
+					
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				//room_member 추가.
+				System.out.println(roomNum);
+				System.out.println(listModel.get(0));
+				for (int i = 0; i < listModel.size(); i++) {
+					sql = "insert into room_member (room_num, id) values (?, ?);";
+					try {
+						pstmt = conn.prepareStatement(sql);
+						pstmt.setInt(1, roomNum);
+						pstmt.setString(2, listModel.get(i));
+						pstmt.executeUpdate();
+						
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				}
+				//방장 추가.
+				sql = "insert into room_member (room_num, id, manager) values (?, ?, ?);";
+				try {
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, roomNum);
+					pstmt.setString(2, thisUser.getId());
+					pstmt.setBoolean(3, true);
+					pstmt.executeUpdate();
+					
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				//초기화
+				listModel.clear();
+				chatListModel.clear();
+				//ChatList로 돌아가기.
+				getRoomList();
+				cardLayout.show(cardPanel, "ChatList");
+				btnEnabled(false, true, true);
 			}
 		});
 
-		cancelBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				cardLayout.show(cardPanel, "ChatList");
-			}
-		});
+
 
 	}
 
@@ -174,14 +248,33 @@ public class ChatListWindow extends JFrame implements ActionListener {
 	private void setupChatListPanel(JPanel chatListPanel) {
 
 		chatListPanel.setLayout(new BorderLayout());
-		DefaultListModel<ChatRoom> chatListModel = new DefaultListModel<>();
+		
+		//채팅방 목록 가져오기
+		getRoomList();
+		
+		chatRoomList = new JList<>(chatListModel);
+		
+		chatRoomList.setCellRenderer(new ListCellRenderer<ChatRoom>() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<? extends ChatRoom> list, ChatRoom value, int index, 
+                    boolean isSelected, boolean cellHasFocus) {
+                
+                DefaultListCellRenderer renderer = new DefaultListCellRenderer();
+                JLabel label = (JLabel) renderer.getListCellRendererComponent(
+                        list, value, index, isSelected, cellHasFocus);
+                label.setText(value.getRoomName()); // 채팅방 이름으로 텍스트 설정
+                label.setFont(new Font("나눔고딕", Font.PLAIN, 20)); // 폰트 설정
+                
+                return label;
+            }
+        });
 		
 
-		chatRoomList = new JList<>(chatListModel);
-		chatRoomList.setCellRenderer(new ChatRoomRenderer());
 		// 폰트설정.
 
 		chatRoomList.setFixedCellHeight(50);
+		
 		JScrollPane scrollPane = new JScrollPane(chatRoomList);
 		chatListPanel.add(scrollPane);
 		// chatRoomList출력.
@@ -191,12 +284,15 @@ public class ChatListWindow extends JFrame implements ActionListener {
 
 		btnChatList = new JButton("목록");
 		btnChatList.setEnabled(false);
-		btnChatList.addActionListener(this);
+	
 		btnAddChat = new JButton("추가");
-		btnAddChat.addActionListener(this);
-		btnSet = new JButton("설정");
-		btnSet.addActionListener(this);
 
+		btnSet = new JButton("설정");
+
+		btnChatList.addActionListener(this);
+		btnAddChat.addActionListener(this);
+		btnSet.addActionListener(this);
+		
 		buttonPanel.add(btnChatList);
 		buttonPanel.add(btnAddChat);
 		buttonPanel.add(btnSet);
@@ -205,6 +301,36 @@ public class ChatListWindow extends JFrame implements ActionListener {
 		setVisible(true);
 
 	}
+	
+	public void getRoomList() {
+		conn = DbConnect.getConn().getDb();
+		
+		sql = "SELECT ROOM_NUM, ROOM_NAME FROM ROOM\r\n"
+				+ "WHERE ROOM_NUM IN (SELECT ROOM_NUM FROM ROOM_MEMBER WHERE ID = ?)";
+		
+		
+		try {
+			pstmt = conn.prepareStatement(sql);	//pstmt에 db에 sql 삽입
+			//pstmt.setString(1, thisUser.getId());
+			pstmt.setString(1, thisUser.getId());
+			
+			ResultSet rs = pstmt.executeQuery();
+			
+
+			while(rs.next()) {
+				ChatRoom chatRoom = new ChatRoom(rs.getInt("ROOM_NUM"), rs.getString("ROOM_NAME"));
+				//MHS
+
+				chatListModel.add(chatListModel.getSize(), chatRoom);
+				
+			}		
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+
 
 	public void btnEnabled(boolean chat, boolean add, boolean set) {
 		btnChatList.setEnabled(chat);

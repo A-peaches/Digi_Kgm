@@ -4,7 +4,7 @@ import Day20.DbExam01;
 
 public class DigiMain {
 	public static void main(String []args ) {
-		User a = new User("Apeach","1234","pipi");
+		User a = new User("pipi","1234","pipi");
 //		new ChatListWindow(a);
 		new LoginWindow();
 //		
