@@ -4,9 +4,11 @@ import Day20.DbExam01;
 
 public class DigiMain {
 	public static void main(String []args ) {
-		User a = new User("pipi","1234","pipi");
-//		new ChatListWindow(a);
+//		User a = new User("popo","1234","popo");
+		User b = new User("root","1234","admin");
+//		new UserWindow(a);
 		new LoginWindow();
+//		new AdminWindow(b);
 //		
 //		a.setAdmin(true);
 //		a.setCutOff(true);

@@ -4,21 +4,30 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -26,7 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 
-public class ChatListWindow extends JFrame implements ActionListener {
+public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
 	private JList<ChatRoom> chatRoomList;
 	DefaultListModel<ChatRoom> chatListModel;
@@ -36,14 +45,17 @@ public class ChatListWindow extends JFrame implements ActionListener {
 	private String sql;
 	private String roomName;
 	private int roomNum;
+	private JLabel profile;
+	private byte[] imageData;
+	Notice notice;
 	PreparedStatement pstmt;
 	Connection conn;
 	
 
-	public ChatListWindow(User user) {
+	public UserWindow(User user) {
 		thisUser = user;
 		// 채팅방 목록 창.
-		setTitle("ChatRoom List");
+		setTitle("digidigi Talk");
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -227,9 +239,113 @@ public class ChatListWindow extends JFrame implements ActionListener {
 	}
 
 	private void setupSettingPanel(JPanel settingPanel) {
-		// TODO Auto-generated method stub
+		settingPanel.setLayout(null);
+		
+
+		//Join 텍스트 생성.
+		JLabel setLabel = new JLabel("Setting");
+		setLabel.setBounds(159,50,80,25);
+		//setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
+		setLabel.setFont(new Font("나눔고딕", Font.PLAIN, 20));
+		settingPanel.add(setLabel);
+		//닉네임 라벨
+		JLabel nickLabel = new JLabel("your nickName :" + thisUser.getNickName());
+		nickLabel.setBounds(130,70,200,80); //크기 설정
+		nickLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		settingPanel.add(nickLabel);
+
+		profile = new JLabel("profile");
+		profile.setFont(new Font("나눔고딕", Font.PLAIN, 12));
+		profile.setBounds(130,140,120,120);
+		settingPanel.add(profile);
+		loadPhoto();
+		
+		JButton proButton = new JButton("add");
+		proButton.addActionListener(this);
+		proButton.setBounds(155,330,70,15);
+		settingPanel.add(proButton);
+		
+
+		
+		//회원가입 버튼 생성 및 위치 생성.
+		JButton okButton = new JButton("Ok");
+		okButton.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		okButton.setBounds(150,380,80,25);
+		//버튼 클릭 시 이벤트 리스너.
+		okButton.addActionListener(this);
+		settingPanel.add(okButton);
+		
+		// 사진 추가 버튼 이벤트
+		proButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        JFileChooser add = new JFileChooser();
+		        int result = add.showOpenDialog(UserWindow.this);
+		        if (result == JFileChooser.APPROVE_OPTION) {
+		            File selectFile = add.getSelectedFile();
+		            try {
+		                Image image = ImageIO.read(selectFile);
+		                imageData = Files.readAllBytes(selectFile.toPath());
+		                profile.setIcon(new ImageIcon(image));
+		                profile.setText("");
+		            } catch (Exception ex) {
+		                ex.printStackTrace();
+		            }
+		        }
+		    }
+		});
+		
+
+		// 확인 버튼 이벤트
+		okButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        if (imageData == null) {
+		            JOptionPane.showMessageDialog(null, "image를 첨부해주세요 ! ", "에러", JOptionPane.ERROR_MESSAGE);
+		        } else {
+		            try {
+		                conn = DbConnect.getConn().getDb();
+		                sql = "UPDATE user SET photo=? WHERE id=?";
+		                pstmt = conn.prepareStatement(sql);
+		                pstmt.setBytes(1, imageData);
+		                pstmt.setString(2, thisUser.getId());
+		                pstmt.executeUpdate();
+		                JOptionPane.showMessageDialog(null, "프로필 이미지가 성공적으로 업데이트되었습니다!", "성공", JOptionPane.INFORMATION_MESSAGE);
+		            } catch (SQLException e1) {
+		                e1.printStackTrace();
+		            }
+		        }
+		    }
+		});
 
 	}
+	
+	//프로필 사진 불러오기 메서드 
+	private void loadPhoto() {
+		try {
+			conn = DbConnect.getConn().getDb();
+            sql = "Select photo from user WHERE id=?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, thisUser.getId());
+            ResultSet rs = pstmt.executeQuery();
+            
+            if(rs.next()) {
+            	imageData = rs.getBytes("photo");
+            	 if (imageData != null && imageData.length > 0) {
+                     // 이미지 데이터를 ImageIcon으로 변환
+                     ImageIcon imageIcon = new ImageIcon(imageData);
+                     // 이미지 크기 조정 (선택적)
+                     Image image = imageIcon.getImage().getScaledInstance(profile.getWidth(), profile.getHeight(), Image.SCALE_SMOOTH);
+                     ImageIcon resizedIcon = new ImageIcon(image);
+
+                     // JLabel에 이미지 표시
+                     profile.setIcon(resizedIcon);
+                     profile.setText(""); // 기존 텍스트 제거
+                 }
+            }
+		} catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
 
 	// 폰트설정.
 	class ChatRoomRenderer extends DefaultListCellRenderer {
@@ -276,9 +392,27 @@ public class ChatListWindow extends JFrame implements ActionListener {
 		chatRoomList.setFixedCellHeight(50);
 		
 		JScrollPane scrollPane = new JScrollPane(chatRoomList);
-		chatListPanel.add(scrollPane);
+		chatListPanel.add(scrollPane, BorderLayout.CENTER);
 		// chatRoomList출력.
 
+//		
+		getNotice();
+		
+		//공지사항 표시할 JLabel 생성.
+		JLabel noticeLabel = new JLabel("<html>" + notice.getNotice_post() +'\n' +
+										notice.getNotice_date()+ "<html>");
+		noticeLabel.setFont(new Font("나눔고딕", Font.PLAIN, 16));
+		noticeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		noticeLabel.setBorder(BorderFactory.createTitledBorder("Notice"));
+		
+		//공지사항 패널 생성
+		JPanel noticePanel = new JPanel(new BorderLayout());
+		noticePanel.add(noticeLabel, BorderLayout.CENTER);
+		noticePanel.setPreferredSize(new Dimension(400,100));
+		
+		chatListPanel.add(noticePanel, BorderLayout.SOUTH);
+		
+		//버튼추가.
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
 
@@ -302,6 +436,28 @@ public class ChatListWindow extends JFrame implements ActionListener {
 
 	}
 	
+	private void getNotice() {
+		notice = new Notice();
+		conn = DbConnect.getConn().getDb();
+		
+		sql = "select notice_post, send_date from notice order by send_date desc limit 1";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				notice.setNotice_post(rs.getString("notice_post"));
+				notice.setNotice_date(rs.getString("send_date"));
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+	}
+
 	public void getRoomList() {
 		conn = DbConnect.getConn().getDb();
 		

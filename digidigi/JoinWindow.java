@@ -127,8 +127,9 @@ public class JoinWindow extends JFrame implements ActionListener{
 			
 			pstmt.executeUpdate();
 			
-			JoinWindow joinWindow = new JoinWindow();
-			dispose();
+            dispose();
+            LoginWindow loginWindow = new LoginWindow();
+            
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -147,6 +148,9 @@ public class JoinWindow extends JFrame implements ActionListener{
 		                imageData = Files.readAllBytes(selectFile.toPath());
 		                profile.setIcon(new ImageIcon(image));
 		                profile.setText("");
+	
+		                
+		                
 		                } catch (Exception ex) {
 		                ex.printStackTrace();
 		            }
