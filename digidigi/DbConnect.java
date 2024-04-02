@@ -28,7 +28,7 @@ public class DbConnect {
 	public static DbConnect getConn() {
 		if (db == null) {
             // 여기에 실제 데이터베이스 연결 정보를 넣어주세요.
-            db = new DbConnect("jdbc:mysql://118.37.94.80:521/digidigi?serverTimezone=UTC", "root", "pcp1225!@af");
+            db = new DbConnect("jdbc:mysql://118.37.94.80:521/digidigi?serverTimezone=UTC", "root", "apeachgood");
         }
         return db;
 	}
