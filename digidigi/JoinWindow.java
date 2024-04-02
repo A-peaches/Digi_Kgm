@@ -31,10 +31,14 @@ public class JoinWindow extends JFrame implements ActionListener{
 		//JVM에서 완전한 창닫기. 닫기버튼 클릭시 창 종료.
 		
 		JPanel panel = new JPanel();
-		 
+		panel.setBackground(Color.WHITE);
+		
 		add(panel);
 		placeComponents(panel);//패널에 컴포넌트 배치
 		
+	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
+	    // 프레임의 아이콘으로 설정
+	    setIconImage(icon.getImage());
 		setVisible(true);
 		//프레임을 화면에 보이도록 설정
 	}
@@ -49,22 +53,25 @@ public class JoinWindow extends JFrame implements ActionListener{
 		JLabel joinLabel = new JLabel("JOIN");
 		joinLabel.setBounds(159,50,80,25);
 		//setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
-		joinLabel.setFont(new Font("나눔고딕", Font.PLAIN, 25));
+		joinLabel.setFont(joinLabel.getFont().deriveFont(25f));
 		panel.add(joinLabel);
 		
 		profile = new JLabel("profile");
-		profile.setFont(new Font("나눔고딕", Font.PLAIN, 12));
 		profile.setBounds(165,90,80,80);
 		panel.add(profile);
 		
-		proButton = new JButton("add");
+		ImageIcon addIcon = new ImageIcon(getClass().getResource("/css/add.png"));
+		proButton = new JButton(addIcon);
 		proButton.addActionListener(this);
-		proButton.setBounds(155,180,70,15);
+		
+		proButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		proButton.setBorderPainted(false);
+		proButton.setOpaque(false);
+		proButton.setBounds(155,180,50,20);
 		panel.add(proButton);
 		//ID라벨 생성
 		JLabel idLabel = new JLabel("ID :");
 		idLabel.setBounds(90,220,80,25);
-		idLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
 		//setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
 		panel.add(idLabel);
 		
@@ -75,8 +82,7 @@ public class JoinWindow extends JFrame implements ActionListener{
 		
 		//비밀번호 라벨 생성 및 위치 생성.
 		JLabel pwLabel = new JLabel("Password :");
-		pwLabel.setBounds(45,260,80,25); //크기 설정
-		pwLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		pwLabel.setBounds(50,260,80,25); //크기 설정
 		panel.add(pwLabel);
 		
 		//비밀번호 입력 필드 생성 및 위치 생성.
@@ -87,7 +93,6 @@ public class JoinWindow extends JFrame implements ActionListener{
 		//닉네임 라벨 생성 및 위치 생성.
 		JLabel nickLabel = new JLabel("nickName :");
 		nickLabel.setBounds(45,300,80,25); //크기 설정
-		nickLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
 		panel.add(nickLabel);
 		
 		//닉네임 입력 필드 생성 및 위치 생성.
@@ -96,9 +101,11 @@ public class JoinWindow extends JFrame implements ActionListener{
 		panel.add(nickField);
 		
 		//회원가입 버튼 생성 및 위치 생성.
-		joinButton = new JButton("Join");
-		joinButton.setFont(new Font("나눔고딕", Font.PLAIN, 14));
-		joinButton.setBounds(150,360,80,25);
+		ImageIcon joinIcon = new ImageIcon(getClass().getResource("/css/join1.png"));
+		joinButton = new JButton(joinIcon);
+		joinButton.setBounds(150,360,80,90);
+		joinButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		joinButton.setBorderPainted(false); // 기존버튼디자인 제거
 		//버튼 클릭 시 이벤트 리스너.
 		joinButton.addActionListener(this);
 		panel.add(joinButton);
@@ -127,8 +134,9 @@ public class JoinWindow extends JFrame implements ActionListener{
 			
 			pstmt.executeUpdate();
 			
-			JoinWindow joinWindow = new JoinWindow();
-			dispose();
+            dispose();
+            LoginWindow loginWindow = new LoginWindow();
+            
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -147,6 +155,9 @@ public class JoinWindow extends JFrame implements ActionListener{
 		                imageData = Files.readAllBytes(selectFile.toPath());
 		                profile.setIcon(new ImageIcon(image));
 		                profile.setText("");
+	
+		                
+		                
 		                } catch (Exception ex) {
 		                ex.printStackTrace();
 		            }

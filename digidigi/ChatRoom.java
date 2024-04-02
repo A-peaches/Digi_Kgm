@@ -5,8 +5,8 @@ public class ChatRoom {
 	private String roomName;
 	
 	//roomNum와 roomName이 notNull임!
-	public ChatRoom(String roomName) {
-		this.roomNum = 0;
+	public ChatRoom(int roomNum, String roomName) {
+		this.roomNum = roomNum;
 		this.roomName = roomName;
 	}
 
