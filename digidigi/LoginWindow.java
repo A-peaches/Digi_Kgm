@@ -1,13 +1,18 @@
 package digidigi;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,13 +39,24 @@ public class LoginWindow extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// JVM에서 완전한 창닫기. 닫기버튼 클릭시 창 종료.
 
+		
 		JPanel panel = new JPanel();
-
+		panel.setBackground(Color.WHITE);
+		
 		add(panel);
 		placeComponents(panel);// 패널에 컴포넌트 배치
 
+		// 프로그램 아이콘 설정
+	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
+	    // 프레임의 아이콘으로 설정
+	    setIconImage(icon.getImage());
+	    
 		setVisible(true);
 		// 프레임을 화면에 보이도록 설정
+		
+		
+		
+		
 	}
 
 	private void placeComponents(JPanel panel) {
@@ -49,48 +65,56 @@ public class LoginWindow extends JFrame implements ActionListener {
 
 		// Join 텍스트 생성.
 		JLabel title = new JLabel("LOGIN");
-		title.setBounds(159, 70, 80, 25);
+		title.setBounds(155, 70, 80, 25);
 		// setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
-		title.setFont(new Font("나눔고딕", Font.PLAIN, 25));
+		title.setFont(title.getFont().deriveFont(25f));
 		panel.add(title);
+		
+		ImageIcon loginimg2 = new ImageIcon(getClass().getResource("/css/login2.png"));
+		JLabel loginimg = new JLabel(loginimg2);
+		loginimg.setBounds(160, 120, 60, 60); // 크기 설정
+		panel.add(loginimg);
+
 
 		// ID라벨 생성
 		JLabel idLabel = new JLabel("ID :");
-		idLabel.setBounds(90, 170, 80, 25);
-		idLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		idLabel.setBounds(100, 220, 80, 25);
 		// setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
 		panel.add(idLabel);
 
 		// ID입력 필드 생성 및 위치 생성.
 		idField = new JTextField(20);
-		idField.setBounds(130, 170, 165, 25);
+		idField.setBounds(130, 220, 165, 25);
 		panel.add(idField);
 
 		// 비밀번호 라벨 생성 및 위치 생성.
 		JLabel pwLabel = new JLabel("Password :");
-		pwLabel.setBounds(45, 210, 80, 25); // 크기 설정
-		pwLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		pwLabel.setBounds(65, 260, 80, 25); // 크기 설정
 		panel.add(pwLabel);
 
 		// 비밀번호 입력 필드 생성 및 위치 생성.
 		pwField = new JPasswordField(20);
-		pwField.setBounds(130, 210, 165, 25);
+		pwField.setBounds(130, 260, 165, 25);
 		panel.add(pwField);
 
 		// 로그인 버튼 생성 및 위치 생성.
-		loginButton = new JButton("Login");
-		loginButton.setFont(new Font("나눔고딕", Font.PLAIN, 14));
-		loginButton.setBounds(150, 280, 80, 25);
+		ImageIcon loginIcon = new ImageIcon(getClass().getResource("/css/login.png"));
+		loginButton = new JButton(loginIcon);
+		loginButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		loginButton.setBorderPainted(false); // 기존버튼디자인 제거
+		loginButton.setBounds(150, 310, 80, 35);
 		// 버튼 클릭 시 이벤트 리스너.
 		loginButton.addActionListener(this);
 		panel.add(loginButton);
 
 		// 회원가입창이동
+		ImageIcon joinIcon = new ImageIcon(getClass().getResource("/css/join.png"));
 		JLabel joinLabel = new JLabel("회원가입이 안되어있으신가요?");
-		joinLabel.setBounds(100, 430, 1900, 25);
-		joinButton = new JButton("Join");
-		joinButton.setBounds(150, 450, 70, 15);
-		joinButton.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		joinLabel.setBounds(110, 430, 1900, 40);
+		joinButton = new JButton(joinIcon);
+		joinButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		joinButton.setBorderPainted(false); // 기존버튼디자인 제거
+		joinButton.setBounds(160, 460, 60, 30);
 		joinButton.addActionListener(this);
 		// setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
 		panel.add(joinButton);

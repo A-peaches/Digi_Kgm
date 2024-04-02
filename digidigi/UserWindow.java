@@ -7,10 +7,13 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 
 public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
@@ -64,11 +68,16 @@ public class UserWindow extends JFrame implements ActionListener {
 		
 		cardLayout = new CardLayout();
 		cardPanel = new JPanel(cardLayout);
-
+		cardPanel.setBackground(Color.WHITE);
+		
 		JPanel chatListPanel = new JPanel();
 		JPanel addChatPanel = new JPanel();
 		JPanel settingPanel = new JPanel();
 
+		
+	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
+	    // 프레임의 아이콘으로 설정
+	    setIconImage(icon.getImage());
 		// 채팅방추가패널
 
 		setupChatListPanel(chatListPanel);
@@ -87,10 +96,11 @@ public class UserWindow extends JFrame implements ActionListener {
 
 		// 패널레이아웃설정
 		addChatPanel.setLayout(new BorderLayout(10, 10));
-
+		addChatPanel.setBackground(Color.WHITE);
+		
 		// 채팅방 만들기 라벨
 		JLabel title = new JLabel(" ♥ New Chatting Room ♥ ");
-		title.setFont(new Font("나눔고딕", Font.PLAIN, 20));
+		title.setFont(title.getFont().deriveFont(20f));
 		addChatPanel.add(title, BorderLayout.NORTH);
 
 		JPanel centerPanel = new JPanel();
@@ -100,19 +110,25 @@ public class UserWindow extends JFrame implements ActionListener {
 		JPanel inputAndInvitePanel = new JPanel(new BorderLayout());
 		JLabel inviteLabel = new JLabel("Please enter the ID you want to invite to the chat room.",
 				SwingConstants.CENTER);
-		inviteLabel.setFont(new Font("나눔고딕", Font.PLAIN, 16));
+		inviteLabel.setFont(inviteLabel.getFont().deriveFont(14f));
 		inputAndInvitePanel.add(inviteLabel, BorderLayout.NORTH);
+		inputAndInvitePanel.setBackground(Color.WHITE);
 		// ID입력 추가 부분
 
 		// 채팅방 이름 입력 필드
 		JPanel inputPanel = new JPanel(new FlowLayout());
 		JTextField RoomNameField = new JTextField(20);
-		RoomNameField.setFont(new Font("나눔고딕", Font.PLAIN, 16));
+		RoomNameField.setFont(RoomNameField.getFont().deriveFont(16f));
 		inputPanel.add(RoomNameField);
-
+		inputPanel.setBackground(Color.WHITE);
+		
 		// ID추가 버튼
-		JButton addBtn = new JButton("Add");
-		addBtn.setFont(new Font("나눔고딕", Font.PLAIN, 16));
+		
+		ImageIcon addIcon = new ImageIcon(getClass().getResource("/css/bigadd2.png"));
+		JButton addBtn = new JButton(addIcon);
+		addBtn.setContentAreaFilled(false); //기존버튼디자인 제거 
+		addBtn
+		.setBorderPainted(false); // 기존버튼디자인 제거
 		inputPanel.add(addBtn);
 
 		inputAndInvitePanel.add(inputPanel, BorderLayout.SOUTH);
@@ -134,10 +150,13 @@ public class UserWindow extends JFrame implements ActionListener {
 
 		// 버튼 패널
 		JPanel btnPanel = new JPanel(new FlowLayout());
-
+		btnPanel.setBackground(Color.WHITE);
 		// 생성 버튼
-		JButton createBtn = new JButton("Create");
-		createBtn.setFont(new Font("나눔고딕", Font.PLAIN, 16));
+		
+		ImageIcon cerateIcon = new ImageIcon(getClass().getResource("/css/Create.png"));
+		JButton createBtn = new JButton(cerateIcon);
+		createBtn.setContentAreaFilled(false); //기존버튼디자인 제거 
+		createBtn.setBorderPainted(false); // 기존버튼디자인 제거
 		btnPanel.add(createBtn);
 		// 취소 버튼
 
@@ -246,31 +265,38 @@ public class UserWindow extends JFrame implements ActionListener {
 		JLabel setLabel = new JLabel("Setting");
 		setLabel.setBounds(159,50,80,25);
 		//setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
-		setLabel.setFont(new Font("나눔고딕", Font.PLAIN, 20));
+		setLabel.setFont(setLabel.getFont().deriveFont(20f));
 		settingPanel.add(setLabel);
+		settingPanel.setBackground(Color.WHITE);
 		//닉네임 라벨
 		JLabel nickLabel = new JLabel("your nickName :" + thisUser.getNickName());
 		nickLabel.setBounds(130,70,200,80); //크기 설정
-		nickLabel.setFont(new Font("나눔고딕", Font.PLAIN, 14));
+		nickLabel.setFont(nickLabel.getFont().deriveFont(14f));
 		settingPanel.add(nickLabel);
 
 		profile = new JLabel("profile");
-		profile.setFont(new Font("나눔고딕", Font.PLAIN, 12));
+		profile.setFont(profile.getFont().deriveFont(12f));
 		profile.setBounds(130,140,120,120);
 		settingPanel.add(profile);
 		loadPhoto();
 		
-		JButton proButton = new JButton("add");
+		ImageIcon proIcon = new ImageIcon(getClass().getResource("/css/addphoto.png"));
+		JButton proButton = new JButton(proIcon);
 		proButton.addActionListener(this);
-		proButton.setBounds(155,330,70,15);
+		proButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		proButton.setBorderPainted(false); 
+		proButton.setBounds(170,330,40,40);
 		settingPanel.add(proButton);
 		
 
 		
 		//회원가입 버튼 생성 및 위치 생성.
-		JButton okButton = new JButton("Ok");
-		okButton.setFont(new Font("나눔고딕", Font.PLAIN, 14));
-		okButton.setBounds(150,380,80,25);
+		ImageIcon okIcon = new ImageIcon(getClass().getResource("/css/submit.png"));
+		JButton okButton = new JButton(okIcon);
+		okButton.setFont(okButton.getFont().deriveFont(14f));
+		okButton.setBounds(152,380,80,35);
+		okButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		okButton.setBorderPainted(false);
 		//버튼 클릭 시 이벤트 리스너.
 		okButton.addActionListener(this);
 		settingPanel.add(okButton);
@@ -348,19 +374,8 @@ public class UserWindow extends JFrame implements ActionListener {
 	
 
 	// 폰트설정.
-	class ChatRoomRenderer extends DefaultListCellRenderer {
-		@Override
-		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus) {
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-			// 여기에서 폰트 설정을 변경할 수 있습니다.
-			setFont(new Font("나눔고딕", Font.PLAIN, 20)); // 원하는 폰트로 변경
-
-			return this;
-		}
-	}
-
+	
 	private void setupChatListPanel(JPanel chatListPanel) {
 
 		chatListPanel.setLayout(new BorderLayout());
@@ -380,7 +395,7 @@ public class UserWindow extends JFrame implements ActionListener {
                 JLabel label = (JLabel) renderer.getListCellRendererComponent(
                         list, value, index, isSelected, cellHasFocus);
                 label.setText(value.getRoomName()); // 채팅방 이름으로 텍스트 설정
-                label.setFont(new Font("나눔고딕", Font.PLAIN, 20)); // 폰트 설정
+                label.setFont(label.getFont().deriveFont(20f)); // 폰트 설정
                 
                 return label;
             }
@@ -401,28 +416,56 @@ public class UserWindow extends JFrame implements ActionListener {
 		//공지사항 표시할 JLabel 생성.
 		JLabel noticeLabel = new JLabel("<html>" + notice.getNotice_post() +'\n' +
 										notice.getNotice_date()+ "<html>");
-		noticeLabel.setFont(new Font("나눔고딕", Font.PLAIN, 16));
+		noticeLabel.setFont(noticeLabel.getFont().deriveFont(16f));
 		noticeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		noticeLabel.setBorder(BorderFactory.createTitledBorder("Notice"));
+		noticeLabel.setBackground(Color.WHITE);
 		
 		//공지사항 패널 생성
 		JPanel noticePanel = new JPanel(new BorderLayout());
 		noticePanel.add(noticeLabel, BorderLayout.CENTER);
 		noticePanel.setPreferredSize(new Dimension(400,100));
+		noticePanel.setBackground(Color.WHITE);
 		
 		chatListPanel.add(noticePanel, BorderLayout.SOUTH);
 		
 		//버튼추가.
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
+		buttonPanel.setBackground(Color.WHITE);
+		
+		ImageIcon originalIcon = new ImageIcon(getClass().getResource("/css/chatlist.png"));
+		Image image = originalIcon.getImage(); // ImageIcon에서 Image를 추출
+		Image resizedImage = image.getScaledInstance(35, 30, Image.SCALE_SMOOTH); // 이미지 크기 조정
+		ImageIcon chatIcon = new ImageIcon(resizedImage); // 조정된 Image로 ImageIcon 재생성
 
-		btnChatList = new JButton("목록");
+		btnChatList = new JButton(chatIcon);
+		btnChatList.setContentAreaFilled(false); //기존버튼디자인 제거 
+		btnChatList.setBorderPainted(false);
+		btnChatList.setOpaque(false);
 		btnChatList.setEnabled(false);
+
 	
-		btnAddChat = new JButton("추가");
+		ImageIcon originalIcon2 = new ImageIcon(getClass().getResource("/css/addchat.png"));
+		Image image2 = originalIcon2.getImage(); // ImageIcon에서 Image를 추출
+		Image resizedImage2 = image2.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // 이미지 크기 조정
+		ImageIcon addChat = new ImageIcon(resizedImage2); // 조정된 Image로 ImageIcon 재생성
+		btnAddChat = new JButton(addChat);
+		btnAddChat.setContentAreaFilled(false);
+		btnAddChat.setBorderPainted(false);
+		btnAddChat.setOpaque(false);
 
-		btnSet = new JButton("설정");
-
+		
+		
+		ImageIcon originalIcon3 = new ImageIcon(getClass().getResource("/css/setting.png"));
+		Image image3 = originalIcon3.getImage(); // ImageIcon에서 Image를 추출
+		Image resizedImage3 = image3.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // 이미지 크기 조정
+		ImageIcon setting = new ImageIcon(resizedImage3); // 조정된 Image로 ImageIcon 재생성
+		btnSet = new JButton(setting);
+		btnSet.setContentAreaFilled(false);
+		btnSet.setBorderPainted(false);
+		btnSet.setOpaque(false);
+		
 		btnChatList.addActionListener(this);
 		btnAddChat.addActionListener(this);
 		btnSet.addActionListener(this);
