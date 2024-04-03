@@ -179,9 +179,15 @@ public class AdminWindow extends JFrame implements ActionListener {
 
 		
 		// 프로필 사진 표시
-		ImageIcon imageIcon = new ImageIcon(user.getPhoto());
-		JLabel photoLabel = new JLabel(new ImageIcon(imageIcon.getImage().getScaledInstance
-				(100,100,Image.SCALE_SMOOTH)));
+		JLabel photoLabel;
+		if (user.getPhoto() == null) {
+		    // photo가 없으면 "no profile" 라벨 생성
+		    photoLabel = new JLabel("No Profile", JLabel.CENTER);
+		} else {
+		    // photo가 있으면, 사진을 라벨에 설정
+		    ImageIcon imageIcon = new ImageIcon(user.getPhoto());
+		    photoLabel = new JLabel(new ImageIcon(imageIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH)));
+		}
 		infoDialog.add(photoLabel, BorderLayout.NORTH);
 		
 		//ID표시

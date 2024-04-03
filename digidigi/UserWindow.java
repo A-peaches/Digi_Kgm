@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -427,6 +428,9 @@ public class UserWindow extends JFrame implements ActionListener {
 						try {
 							socket = new Socket("192.168.0.83",3000);
 							ChatRoomWindow chatRoomWindow = new ChatRoomWindow(socket, thisUser, selectedRoom);
+							PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+							String initialMessage = selectedRoom.getRoomNum() + "|" + thisUser.getId();
+							out.println(initialMessage);
 							setLocationRelativeTo(null);
 							chatRoomWindow.setVisible(true);
 						} catch (IOException ex) {
