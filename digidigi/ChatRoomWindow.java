@@ -27,6 +27,7 @@ public class ChatRoomWindow extends JFrame{
 	private JTextArea chatArea;
 	private JTextField messageField;
 	private JButton sendButton;
+	private JButton searchButton;
 	private String sql;
 	PreparedStatement pstmt;
 	Connection conn;
@@ -50,13 +51,16 @@ public class ChatRoomWindow extends JFrame{
 		this.chatRoom = chatRoom;
 		loadChat();
 		roomUI();
+		
+		setVisible(true);
 	}
 
 
 	private void roomUI() {
 		setTitle(chatRoom.getRoomName() + " - " + thisUser.getId()); //채팅방 이름과 현재 접속 id 
 		setSize(400,550);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //종료옵션
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //종료옵션
+		
 		
 		
 		//채팅방 종료시 socket close.
@@ -70,7 +74,7 @@ public class ChatRoomWindow extends JFrame{
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
-				System.exit(0);
+				dispose();
 			}
 
 		});
@@ -78,11 +82,44 @@ public class ChatRoomWindow extends JFrame{
 	}
 	
 	private void loadChat() {
+		chatArea.setText("");
+		
 		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = CURDATE() ";
 		
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, chatRoom.getRoomNum());
+			
+			ResultSet rs = pstmt.executeQuery();
+			
+			boolean hasData = false;
+			
+			while (rs.next()) {
+				
+				hasData = true;
+				String id = rs.getString("id");
+				String chat = rs.getString("chat");
+				
+				chatArea.append(id + " > " + chat + "\n");
+			}
+	        if (!hasData) {
+	            // 조회된 데이터가 없을 경우 메시지 표시
+	            chatArea.append("대화내용이 없습니다!");
+	        }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void loadChatHistoryForDate(String inputDate) {
+		chatArea.setText("");
+		
+		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = ?"; // '2024-04-03 형태가능'' 
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, chatRoom.getRoomNum());
+			pstmt.setString(2, inputDate);
 			
 			ResultSet rs = pstmt.executeQuery();
 			
@@ -114,10 +151,45 @@ public class ChatRoomWindow extends JFrame{
 		roomNameLabel.setBounds(0,10,300,30);
 		add(roomNameLabel);
 		
-			//채팅 영역 생성
+		ImageIcon searchIcon = new ImageIcon(getClass().getResource("/css/search.png"));
+		searchButton = new JButton("검색",searchIcon);
+		searchButton.setBounds(309,10,58,30);
+		searchButton.setContentAreaFilled(false); //기존버튼디자인 제거 
+		searchButton.setBorderPainted(false);
+		add(searchButton);
+		
+		searchButton.addActionListener(e -> {
+			if (searchButton.getText().equals("검색")) {
+				//검색상태일떄의 동작.
+				String inputDate = JOptionPane.showInputDialog("날짜를 입력하세요. (예: 2024-04-01)");
+				if (inputDate != null && !inputDate.isEmpty()) {
+
+					ImageIcon restoreIcon = new ImageIcon(getClass().getResource("/css/restore.png"));
+					loadChatHistoryForDate(inputDate); // 특정 날짜의 채팅 내용 로드
+					searchButton.setText("복구"); // 버튼 라벨 변경
+					searchButton.setIcon(restoreIcon); //
+					searchButton.setBounds(320,5,50,30);
+				}
+			} else if (searchButton.getText().equals("복구")) {
+		        loadChat(); // 오늘 날짜의 채팅 내용 로드
+		        searchButton.setText("검색"); // 버튼 라벨을 원래대로 변경
+		        searchButton.setIcon(searchIcon); // 
+		        searchButton.setBounds(309,10,58,30);
+		        
+		    }
+		});
+
+		// 복구 버튼 클릭 시 동작 (검색 버튼의 라벨을 '복구'로 바꾼 후 같은 버튼으로 처리)
+		searchButton.addActionListener(e -> {
+		  
+		});
+		
+		//채팅 영역 생성
 		chatArea.setFont(chatArea.getFont().deriveFont(15f));
 		JScrollPane scrollPane = new JScrollPane(chatArea);
 		scrollPane.setBounds(10, 40, 360, 400);
+		
+		
 		add(scrollPane);
 		
 
@@ -136,6 +208,7 @@ public class ChatRoomWindow extends JFrame{
 		sendButton.setBounds(300, 443, 80, 60); // 전송 버튼의 위치와 크기 설정
 		panel.add(sendButton);
 		    
+		add(panel);
 		
 		sendButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -167,7 +240,7 @@ public class ChatRoomWindow extends JFrame{
 
 		});
 		
-		add(panel);
+		
 	}
 	
 	//메시지 db밀어넣기 

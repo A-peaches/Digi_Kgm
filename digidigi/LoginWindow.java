@@ -204,6 +204,7 @@ public class LoginWindow extends JFrame implements ActionListener {
 				e1.printStackTrace();
 			}
 		} else if (e.getSource() == joinButton) {
+			setLocationRelativeTo(null);
 			JoinWindow joinwindow = new JoinWindow();
 
 			// 현재(LoginWindow) 창 닫기

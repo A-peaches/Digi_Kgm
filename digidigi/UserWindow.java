@@ -431,8 +431,8 @@ public class UserWindow extends JFrame implements ActionListener {
 							PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 							String initialMessage = selectedRoom.getRoomNum() + "|" + thisUser.getId();
 							out.println(initialMessage);
-							setLocationRelativeTo(null);
-							chatRoomWindow.setVisible(true);
+							
+							
 						} catch (IOException ex) {
 		                    ex.printStackTrace();
 		                    JOptionPane.showMessageDialog(null, "채팅방에 접속할 수 없습니다.", "연결 실패", 
