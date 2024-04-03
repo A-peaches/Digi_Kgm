@@ -11,9 +11,14 @@ import java.awt.FontFormatException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +44,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+
 public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
 	private JList<ChatRoom> chatRoomList;
@@ -60,6 +66,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		thisUser = user;
 		// 채팅방 목록 창.
 		setTitle("digidigi Talk");
+		//창크기
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -172,7 +179,7 @@ public class UserWindow extends JFrame implements ActionListener {
 			}
 		});
 
-		//방만들기.
+		//채팅방 생성.
 		createBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
@@ -399,18 +406,51 @@ public class UserWindow extends JFrame implements ActionListener {
                 
                 return label;
             }
+            
         });
+		
+		
+		//채팅방 더블클릭시 Window
 		
 
 		// 폰트설정.
 
 		chatRoomList.setFixedCellHeight(50);
 		
+		chatRoomList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount()==2) {
+					ChatRoom selectedRoom = chatRoomList.getSelectedValue();
+					if(selectedRoom != null) {
+						//서버연결
+						Socket socket;
+						try {
+							socket = new Socket("192.168.0.83",3000);
+							ChatRoomWindow chatRoomWindow = new ChatRoomWindow(socket, thisUser, selectedRoom);
+							PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+							String initialMessage = selectedRoom.getRoomNum() + "|" + thisUser.getId();
+							out.println(initialMessage);
+							
+							
+						} catch (IOException ex) {
+		                    ex.printStackTrace();
+		                    JOptionPane.showMessageDialog(null, "채팅방에 접속할 수 없습니다.", "연결 실패", 
+		                    		JOptionPane.ERROR_MESSAGE);
+		                }
+
+						
+					}
+				}
+			}
+		});
 		JScrollPane scrollPane = new JScrollPane(chatRoomList);
 		chatListPanel.add(scrollPane, BorderLayout.CENTER);
 		// chatRoomList출력.
-
-//		
+		
+		
+		
+//		------------------------------여기부턴 공지사항---------------------------------
 		getNotice();
 		
 		//공지사항 표시할 JLabel 생성.
@@ -429,6 +469,13 @@ public class UserWindow extends JFrame implements ActionListener {
 		
 		chatListPanel.add(noticePanel, BorderLayout.SOUTH);
 		
+		placeButton();
+		setLocationRelativeTo(null);
+		setVisible(true);
+
+	}
+	
+	private void placeButton() {
 		//버튼추가.
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
@@ -474,8 +521,6 @@ public class UserWindow extends JFrame implements ActionListener {
 		buttonPanel.add(btnAddChat);
 		buttonPanel.add(btnSet);
 		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
-
-		setVisible(true);
 
 	}
 	
@@ -528,7 +573,6 @@ public class UserWindow extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 	}
-	
 
 
 	public void btnEnabled(boolean chat, boolean add, boolean set) {

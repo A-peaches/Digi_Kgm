@@ -15,6 +15,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -77,7 +80,8 @@ public class AdminWindow extends JFrame implements ActionListener {
 		
 		cardLayout = new CardLayout();
 		cardPanel = new JPanel(cardLayout);
-
+		cardPanel.setBackground(Color.WHITE);
+		
 		JPanel memberListPanel = new JPanel();
 		JPanel chatListPanel = new JPanel();
 		JPanel settingPanel = new JPanel();
@@ -156,10 +160,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 
 		});
 
-
 		
-		// 폰트설정.
-
 		memberList.setFixedCellHeight(50);
 		
 		JScrollPane scrollPane = new JScrollPane(memberList);
@@ -182,9 +183,15 @@ public class AdminWindow extends JFrame implements ActionListener {
 
 		
 		// 프로필 사진 표시
-		ImageIcon imageIcon = new ImageIcon(user.getPhoto());
-		JLabel photoLabel = new JLabel(new ImageIcon(imageIcon.getImage().getScaledInstance
-				(100,100,Image.SCALE_SMOOTH)));
+		JLabel photoLabel;
+		if (user.getPhoto() == null) {
+		    // photo가 없으면 "no profile" 라벨 생성
+		    photoLabel = new JLabel("No Profile", JLabel.CENTER);
+		} else {
+		    // photo가 있으면, 사진을 라벨에 설정
+		    ImageIcon imageIcon = new ImageIcon(user.getPhoto());
+		    photoLabel = new JLabel(new ImageIcon(imageIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH)));
+		}
 		infoDialog.add(photoLabel, BorderLayout.NORTH);
 		
 		//ID표시
@@ -218,7 +225,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 		});
 		
 		
-		
+		setLocationRelativeTo(null);
 		infoDialog.setVisible(true);
 		
 	}
@@ -396,32 +403,57 @@ public class AdminWindow extends JFrame implements ActionListener {
             }
         });
 		
-
-		// 폰트설정.
-
 		chatRoomList.setFixedCellHeight(50);
+		chatRoomList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount()==2) {
+					ChatRoom selectedRoom = chatRoomList.getSelectedValue();
+					if(selectedRoom != null) {
+						//서버연결
+						Socket socket;
+						try {
+							socket = new Socket("192.168.0.83",3000);
+							ChatRoomWindow chatRoomWindow = new ChatRoomWindow(socket, thisUser, selectedRoom);
+							PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+							String initialMessage = selectedRoom.getRoomNum() + "|" + thisUser.getId();
+							out.println(initialMessage);
+							
+							
+						} catch (IOException ex) {
+		                    ex.printStackTrace();
+		                    JOptionPane.showMessageDialog(null, "채팅방에 접속할 수 없습니다.", "연결 실패", 
+		                    		JOptionPane.ERROR_MESSAGE);
+		                }
+
+						
+					}
+				}
+			}
+		});
+		
+		
+		
+		
 		
 		JScrollPane scrollPane = new JScrollPane(chatRoomList);
 		chatListPanel.add(scrollPane);
 		// chatRoomList출력.
 		
 		
+//		------------------------------여기부턴 공지사항---------------------------------
 		//공지사항 입력 필드와 버튼 추가
 		JPanel noticeInputPanel = new JPanel();
 		noticeInputPanel.setLayout(new BorderLayout());
 		noticeInputPanel.setBackground(Color.WHITE);
-		noticeField = new JTextField(); // 공지사항 입력 필드.
-		ImageIcon sendIcon = new ImageIcon(getClass().getResource("/css/send.png"));
-		btnSendNotice = new JButton(sendIcon);
-		btnSendNotice.setContentAreaFilled(false); //기존버튼디자인 제거 
-		btnSendNotice.setBorderPainted(false);
-		btnSendNotice.addActionListener(e -> sendNotice());
 		
+		placeNotice();
+		getNotice(); 
 		
 		noticeInputPanel.add(noticeField, BorderLayout.CENTER);
 		noticeInputPanel.add(btnSendNotice, BorderLayout.EAST);
 		
-		getNotice(); 
+		
 		
 		chatListPanel.add(noticeInputPanel, BorderLayout.SOUTH);
 		
@@ -429,6 +461,34 @@ public class AdminWindow extends JFrame implements ActionListener {
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
 		buttonPanel.setBackground(Color.WHITE);
 		
+		//버튼추가
+		placeButton();
+		
+		btnChatList.addActionListener(this);
+		btnMemberList.addActionListener(this);
+		btnSet.addActionListener(this);
+		
+		buttonPanel.add(btnMemberList);
+		buttonPanel.add(btnChatList);
+		buttonPanel.add(btnSet);
+		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
+		
+		setLocationRelativeTo(null);
+		setVisible(true);
+
+	}
+	
+	private void placeNotice() {
+		noticeField = new JTextField(); // 공지사항 입력 필드.
+		ImageIcon sendIcon = new ImageIcon(getClass().getResource("/css/send.png"));
+		btnSendNotice = new JButton(sendIcon);
+		btnSendNotice.setContentAreaFilled(false); //기존버튼디자인 제거 
+		btnSendNotice.setBorderPainted(false);
+		btnSendNotice.addActionListener(e -> sendNotice());
+	}
+	
+	private void placeButton() {
+
 		ImageIcon originalIcon2 = new ImageIcon(getClass().getResource("/css/member.png"));
 		Image image2 = originalIcon2.getImage(); // ImageIcon에서 Image를 추출
 		Image resizedImage2 = image2.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // 이미지 크기 조정
@@ -456,18 +516,6 @@ public class AdminWindow extends JFrame implements ActionListener {
 		btnSet.setContentAreaFilled(false);
 		btnSet.setBorderPainted(false);
 		btnSet.setOpaque(false);
-		
-		btnChatList.addActionListener(this);
-		btnMemberList.addActionListener(this);
-		btnSet.addActionListener(this);
-		
-		buttonPanel.add(btnMemberList);
-		buttonPanel.add(btnChatList);
-		buttonPanel.add(btnSet);
-		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
-
-		setVisible(true);
-
 	}
 	
 	private void sendNotice() { //공지사항 보내기.

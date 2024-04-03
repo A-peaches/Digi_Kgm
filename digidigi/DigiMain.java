@@ -10,8 +10,11 @@ import javax.swing.UIManager;
 
 import Day20.DbExam01;
 
+
 public class DigiMain {
-	public static void main(String []args ) {
+
+	public void placeFont() {
+
 		try {
 		    // 폰트 파일 로드
 		    InputStream is = DigiMain.class.getResourceAsStream("/css/MyFont.ttf");
@@ -29,12 +32,28 @@ public class DigiMain {
 		} catch (IOException | FontFormatException e) {
 		    e.printStackTrace();
 		}
+	}
+	
+	public static void main(String []args ) {
+
 		
+		DigiMain main = new DigiMain();
+		main.placeFont();
 		
 		User a = new User("pipi","1234","pipi");
-		User b = new User("root","1234","admin");
+		User c = new User("odeng","1234","odeng");
+		User d = new User("popo","1234","popo");
+		User r = new User("admin","1234","admin");
+		ChatRoom b = new ChatRoom(14,"pipi,popo,odeng,");
+//		User b = new User("root","1234","admin");
+//
 
+//
+//		ChatRoomWindow ch = new ChatRoomWindow(a, b);
 		new LoginWindow();
+	
+//		new AdminWindow(r);
+	
 	}
 	
 
