@@ -156,10 +156,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 
 		});
 
-
 		
-		// 폰트설정.
-
 		memberList.setFixedCellHeight(50);
 		
 		JScrollPane scrollPane = new JScrollPane(memberList);
@@ -406,22 +403,19 @@ public class AdminWindow extends JFrame implements ActionListener {
 		// chatRoomList출력.
 		
 		
+		
 		//공지사항 입력 필드와 버튼 추가
 		JPanel noticeInputPanel = new JPanel();
 		noticeInputPanel.setLayout(new BorderLayout());
 		noticeInputPanel.setBackground(Color.WHITE);
-		noticeField = new JTextField(); // 공지사항 입력 필드.
-		ImageIcon sendIcon = new ImageIcon(getClass().getResource("/css/send.png"));
-		btnSendNotice = new JButton(sendIcon);
-		btnSendNotice.setContentAreaFilled(false); //기존버튼디자인 제거 
-		btnSendNotice.setBorderPainted(false);
-		btnSendNotice.addActionListener(e -> sendNotice());
 		
+		placeNotice();
+		getNotice(); 
 		
 		noticeInputPanel.add(noticeField, BorderLayout.CENTER);
 		noticeInputPanel.add(btnSendNotice, BorderLayout.EAST);
 		
-		getNotice(); 
+		
 		
 		chatListPanel.add(noticeInputPanel, BorderLayout.SOUTH);
 		
@@ -429,6 +423,33 @@ public class AdminWindow extends JFrame implements ActionListener {
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
 		buttonPanel.setBackground(Color.WHITE);
 		
+		//버튼추가
+		placeButton();
+		
+		btnChatList.addActionListener(this);
+		btnMemberList.addActionListener(this);
+		btnSet.addActionListener(this);
+		
+		buttonPanel.add(btnMemberList);
+		buttonPanel.add(btnChatList);
+		buttonPanel.add(btnSet);
+		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
+
+		setVisible(true);
+
+	}
+	
+	private void placeNotice() {
+		noticeField = new JTextField(); // 공지사항 입력 필드.
+		ImageIcon sendIcon = new ImageIcon(getClass().getResource("/css/send.png"));
+		btnSendNotice = new JButton(sendIcon);
+		btnSendNotice.setContentAreaFilled(false); //기존버튼디자인 제거 
+		btnSendNotice.setBorderPainted(false);
+		btnSendNotice.addActionListener(e -> sendNotice());
+	}
+	
+	private void placeButton() {
+
 		ImageIcon originalIcon2 = new ImageIcon(getClass().getResource("/css/member.png"));
 		Image image2 = originalIcon2.getImage(); // ImageIcon에서 Image를 추출
 		Image resizedImage2 = image2.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // 이미지 크기 조정
@@ -456,18 +477,6 @@ public class AdminWindow extends JFrame implements ActionListener {
 		btnSet.setContentAreaFilled(false);
 		btnSet.setBorderPainted(false);
 		btnSet.setOpaque(false);
-		
-		btnChatList.addActionListener(this);
-		btnMemberList.addActionListener(this);
-		btnSet.addActionListener(this);
-		
-		buttonPanel.add(btnMemberList);
-		buttonPanel.add(btnChatList);
-		buttonPanel.add(btnSet);
-		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
-
-		setVisible(true);
-
 	}
 	
 	private void sendNotice() { //공지사항 보내기.

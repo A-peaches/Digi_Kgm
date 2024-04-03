@@ -60,6 +60,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		thisUser = user;
 		// 채팅방 목록 창.
 		setTitle("digidigi Talk");
+		//창크기
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -172,7 +173,7 @@ public class UserWindow extends JFrame implements ActionListener {
 			}
 		});
 
-		//방만들기.
+		//채팅방 생성.
 		createBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
@@ -399,7 +400,11 @@ public class UserWindow extends JFrame implements ActionListener {
                 
                 return label;
             }
+            
         });
+		
+		
+		//채팅방 더블클릭시 Window
 		
 
 		// 폰트설정.
@@ -429,6 +434,12 @@ public class UserWindow extends JFrame implements ActionListener {
 		
 		chatListPanel.add(noticePanel, BorderLayout.SOUTH);
 		
+		placeButton();
+		setVisible(true);
+
+	}
+	
+	private void placeButton() {
 		//버튼추가.
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
@@ -474,8 +485,6 @@ public class UserWindow extends JFrame implements ActionListener {
 		buttonPanel.add(btnAddChat);
 		buttonPanel.add(btnSet);
 		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
-
-		setVisible(true);
 
 	}
 	
@@ -528,7 +537,6 @@ public class UserWindow extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 	}
-	
 
 
 	public void btnEnabled(boolean chat, boolean add, boolean set) {
