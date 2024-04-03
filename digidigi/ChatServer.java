@@ -78,17 +78,14 @@ public class ChatServer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
-				try {
-					clientSocket.close();
-					clientHandlers.remove(this);//연결 종료 시 리스트에서 제거.
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
+		        try {
+		            clientSocket.close();
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+		        clientHandlers.remove(this); // 연결 종료 시 리스트에서 제거
+		    }
 		}
-
 		private void handleIncomingMessage(String message) {
 		    // 메시지에서  채팅방 ID, 사용자 ID, 메시지 본문 분리 (필요한 경우)
 		    String[] parts = message.split("\\|", 3);
@@ -103,16 +100,12 @@ public class ChatServer {
 		                handler.sendMessage(receivedUserId+" > "+messageText); // 메시지 본문만 전송
 		            }
 		        }
-		        
-		        for(int handler = 0; handler < clientHandlers.size(); i++ ) {
-		        	
-		        }
+
 		    }
 		}
 
 		private void handleFirstMessage(String message) {
 		    String[] parts = message.split("\\|", 3);
-		    System.out.println("handleFirstMessage : / "+parts.length);
 		    if (parts.length >= 2) {
 		        this.chatRoomId = parts[0]; // 첫 번째 부분을 사용자 ID로 설정
 		        this.userId = parts[1]; // 두 번째 부분을 채팅방 ID로 설정
