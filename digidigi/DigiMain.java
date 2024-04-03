@@ -43,14 +43,14 @@ public class DigiMain {
 		User a = new User("pipi","1234","pipi");
 		User c = new User("odeng","1234","odeng");
 		User d = new User("popo","1234","popo");
-		User r = new User("root","1234","admin");
+		User r = new User("admin","1234","admin");
 		ChatRoom b = new ChatRoom(14,"pipi,popo,odeng,");
 //		User b = new User("root","1234","admin");
 //
-//		new LoginWindow();
+
 //
 //		ChatRoomWindow ch = new ChatRoomWindow(a, b);
-		new UserWindow(d);
+		new LoginWindow();
 	
 //		new AdminWindow(r);
 	

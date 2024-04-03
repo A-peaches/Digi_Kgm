@@ -92,20 +92,15 @@ public class ChatRoomWindow extends JFrame{
 			
 			ResultSet rs = pstmt.executeQuery();
 			
-			boolean hasData = false;
 			
 			while (rs.next()) {
 				
-				hasData = true;
 				String id = rs.getString("id");
 				String chat = rs.getString("chat");
 				
 				chatArea.append(id + " > " + chat + "\n");
 			}
-	        if (!hasData) {
-	            // 조회된 데이터가 없을 경우 메시지 표시
-	            chatArea.append("대화내용이 없습니다!");
-	        }
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -115,6 +110,7 @@ public class ChatRoomWindow extends JFrame{
 	private void loadChatHistoryForDate(String inputDate) {
 		chatArea.setText("");
 		
+		
 		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = ?"; // '2024-04-03 형태가능'' 
 		try {
 			pstmt = conn.prepareStatement(sql);
@@ -122,13 +118,21 @@ public class ChatRoomWindow extends JFrame{
 			pstmt.setString(2, inputDate);
 			
 			ResultSet rs = pstmt.executeQuery();
-			
+			boolean hasData = false;
 			while (rs.next()) {
+				
+				hasData = true;
 				String id = rs.getString("id");
 				String chat = rs.getString("chat");
 				
 				chatArea.append(id + " > " + chat + "\n");
 			}
+			
+	        if (!hasData) {
+	            // 조회된 데이터가 없을 경우 메시지 표시
+	            chatArea.append(" 대화내용이 없습니다!");
+	        }
+	        
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
