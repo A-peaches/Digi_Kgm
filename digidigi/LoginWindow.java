@@ -51,6 +51,7 @@ public class LoginWindow extends JFrame implements ActionListener {
 	    // 프레임의 아이콘으로 설정
 	    setIconImage(icon.getImage());
 	    
+	    setLocationRelativeTo(null);
 		setVisible(true);
 		// 프레임을 화면에 보이도록 설정
 		

@@ -41,12 +41,14 @@ public class DigiMain {
 		main.placeFont();
 		
 		User a = new User("pipi","1234","pipi");
-		ChatRoom b = new ChatRoom();
-		//		User b = new User("root","1234","admin");
+		ChatRoom b = new ChatRoom(14,"pipi,popo,odeng,");
+//		User b = new User("root","1234","admin");
 //
 //		new LoginWindow();
-
-		ChatRoomWindow ch = new ChatRoomWindow();
+//
+//		ChatRoomWindow ch = new ChatRoomWindow(a, b);
+		new UserWindow(a);
+	
 	}
 	
 

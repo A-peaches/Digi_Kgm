@@ -215,7 +215,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 		});
 		
 		
-		
+		setLocationRelativeTo(null);
 		infoDialog.setVisible(true);
 		
 	}
@@ -434,7 +434,8 @@ public class AdminWindow extends JFrame implements ActionListener {
 		buttonPanel.add(btnChatList);
 		buttonPanel.add(btnSet);
 		add(buttonPanel, BorderLayout.SOUTH); // 버튼 남쪽 하단 배치.
-
+		
+		setLocationRelativeTo(null);
 		setVisible(true);
 
 	}

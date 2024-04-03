@@ -11,9 +11,13 @@ import java.awt.FontFormatException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,6 +42,7 @@ import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+
 
 public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
@@ -411,11 +416,37 @@ public class UserWindow extends JFrame implements ActionListener {
 
 		chatRoomList.setFixedCellHeight(50);
 		
+		chatRoomList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount()==2) {
+					ChatRoom selectedRoom = chatRoomList.getSelectedValue();
+					if(selectedRoom != null) {
+						//서버연결
+						Socket socket;
+						try {
+							socket = new Socket("192.168.0.83",3000);
+							ChatRoomWindow chatRoomWindow = new ChatRoomWindow(socket, thisUser, selectedRoom);
+							setLocationRelativeTo(null);
+							chatRoomWindow.setVisible(true);
+						} catch (IOException ex) {
+		                    ex.printStackTrace();
+		                    JOptionPane.showMessageDialog(null, "채팅방에 접속할 수 없습니다.", "연결 실패", 
+		                    		JOptionPane.ERROR_MESSAGE);
+		                }
+
+						
+					}
+				}
+			}
+		});
 		JScrollPane scrollPane = new JScrollPane(chatRoomList);
 		chatListPanel.add(scrollPane, BorderLayout.CENTER);
 		// chatRoomList출력.
-
-//		
+		
+		
+		
+//		------------------------------여기부턴 공지사항---------------------------------
 		getNotice();
 		
 		//공지사항 표시할 JLabel 생성.
@@ -435,6 +466,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		chatListPanel.add(noticePanel, BorderLayout.SOUTH);
 		
 		placeButton();
+		setLocationRelativeTo(null);
 		setVisible(true);
 
 	}
