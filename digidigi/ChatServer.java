@@ -70,7 +70,7 @@ public class ChatServer {
 				
 				
 				 while ((message = reader.readLine()) != null) {
-		                System.out.println(clientSocket + "Received : " + message);
+		                System.out.println(clientSocket + "Received2 : " + message);
 		                handleIncomingMessage(message);
 		            }
 				 
@@ -90,25 +90,30 @@ public class ChatServer {
 		}
 
 		private void handleIncomingMessage(String message) {
-		    // 메시지에서 사용자 ID, 채팅방 ID, 메시지 본문 분리 (필요한 경우)
+		    // 메시지에서  채팅방 ID, 사용자 ID, 메시지 본문 분리 (필요한 경우)
 		    String[] parts = message.split("\\|", 3);
 		    String receivedChatRoomId = parts.length > 0 ? parts[0] : "";
 		    String receivedUserId= parts.length > 1 ? parts[1] : "";
 		    String messageText = parts.length > 2 ? parts[2] : "";
 
-		    // 현재 핸들러가 해당 채팅방의 메시지를 처리해야 할 경우
+//		     현재 핸들러가 해당 채팅방의 메시지를 처리해야 할 경우
 		    if (isInChatRoom(receivedChatRoomId)) {
 		        for (ClientHandler handler : clientHandlers) {
 		            if (handler.isInChatRoom(receivedChatRoomId)) {
-		                handler.sendMessage(messageText); // 메시지 본문만 전송
+		                handler.sendMessage(receivedUserId+" > "+messageText); // 메시지 본문만 전송
 		            }
+		        }
+		        
+		        for(int handler = 0; handler < clientHandlers.size(); i++ ) {
+		        	
 		        }
 		    }
 		}
 
 		private void handleFirstMessage(String message) {
 		    String[] parts = message.split("\\|", 3);
-		    if (parts.length > 2) {
+		    System.out.println("handleFirstMessage : / "+parts.length);
+		    if (parts.length >= 2) {
 		        this.chatRoomId = parts[0]; // 첫 번째 부분을 사용자 ID로 설정
 		        this.userId = parts[1]; // 두 번째 부분을 채팅방 ID로 설정
 		        // 첫 메시지 처리시, 메시지 본문(세 번째 부분)은 사용하지 않거나, 필요에 따라 처리

@@ -130,7 +130,6 @@ public class ChatRoomWindow extends JFrame{
 			 try {
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				String message;
-				
 				while((message = in.readLine()) != null ) {
 					String finalMessage = message;
 					SwingUtilities.invokeLater(()-> chatArea.append(finalMessage + "\n"));
