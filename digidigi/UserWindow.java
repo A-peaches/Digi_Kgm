@@ -66,6 +66,7 @@ public class UserWindow extends JFrame implements ActionListener {
 	
 
 	public UserWindow(User user) {
+		conn = DbConnect.getConn().getDb();
 		thisUser = user;
 		// 채팅방 목록 창.
 		setTitle("digidigi Talk" + " - " + thisUser.getId());
@@ -175,9 +176,33 @@ public class UserWindow extends JFrame implements ActionListener {
 		addBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String id = RoomNameField.getText();
+				String searchId = null;
 				if (!id.isEmpty()) {
-					listModel.addElement(id);
-					RoomNameField.setText("");
+					sql = "select id from User where id =?";
+					try {
+						pstmt = conn.prepareStatement(sql);
+						pstmt.setString(1, id);
+						ResultSet rs = pstmt.executeQuery();
+						
+						while (rs.next()) {
+							searchId = rs.getString("id");
+						}
+						
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					if(id.equals(searchId)) {
+						listModel.addElement(id);
+						RoomNameField.setText("");
+					} else {
+						JOptionPane.showMessageDialog(null,
+								"존재하지 않는 ID입니다!", "에러",
+								JOptionPane.ERROR_MESSAGE);
+						RoomNameField.setText("");
+					}
+
 				}
 			}
 		});
@@ -191,7 +216,7 @@ public class UserWindow extends JFrame implements ActionListener {
 				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
 				roomName = inputRoomName;
 				
-				conn = DbConnect.getConn().getDb();
+
 				sql = "insert into room (room_name) values (?)";
 				try {
 					pstmt = conn.prepareStatement(sql);
@@ -539,7 +564,6 @@ public class UserWindow extends JFrame implements ActionListener {
 		try {
 			pstmt = conn.prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();
-			
 			if(rs.next()) {
 				notice.setNotice_post(rs.getString("notice_post"));
 				notice.setNotice_date(rs.getString("send_date"));
@@ -593,6 +617,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		// TODO Auto-generated method stub
 		if (e.getSource() == btnChatList) {
 			chatListModel.clear();
+			getNotice();
 			getRoomList();
 			cardLayout.show(cardPanel, "ChatList");
 			btnEnabled(false, true, true);
