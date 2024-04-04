@@ -29,6 +29,7 @@ public class ChatRoomWindow extends JFrame{
 	private JButton sendButton;
 	private JButton searchButton;
 	private String sql;
+	private int manager;
 	PreparedStatement pstmt;
 	Connection conn;
 	
@@ -221,18 +222,71 @@ public class ChatRoomWindow extends JFrame{
 				System.out.println(message.substring(0, 3));
 				//메시지 읽어들어옴
 				saveMsg(message);
-				if(message.startsWith("/강퇴 ")) {
-					 String[] parts = message.split(" ", 2); // 두 부분으로 분리
-					 String kickedUser = parts[1];  // 강퇴할 사용자 id 저장.
-					 System.out.println(kickedUser+"님이 강퇴되었습니다.");
-					
-					
-					 sql = "select id from room_member where room_num = ?";
-					
-					 		
-					
-				}else if(!message.isEmpty()) {
+				if(!message.isEmpty()) {
 					try {
+						sql = "select manager from room_member where id = ? and room_num = ?";
+						try {
+							pstmt = conn.prepareStatement(sql);
+							pstmt.setString(1,thisUser.getId());
+							pstmt.setInt(2,chatRoom.getRoomNum());
+							
+							ResultSet rs = pstmt.executeQuery();
+							while(rs.next()) {
+								manager = rs.getInt("manager");
+							}
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
+
+						
+						
+							if(manager == 1) {
+								if(message.startsWith("/강퇴 ")) {
+							 String[] parts = message.split(" ", 2); // 두 부분으로 분리
+							 String kickedUser = parts[1];  // 강퇴할 사용자 id 저장.
+							 message = kickedUser+"님이 강퇴되었습니다.";
+							 //sql 넣기
+							 saveMsg(message);
+							 
+							//강퇴로직
+							 sql = "delete from room_member where id = ?";
+								try {
+									pstmt = conn.prepareStatement(sql);
+									pstmt.setString(1, kickedUser);
+									pstmt.executeUpdate(); 
+								} catch (SQLException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							} else if (message.startsWith("/초대 ")) {
+								String[] parts = message.split(" ", 2); // 두 부분으로 분리
+								 String invitedUser = parts[1];  // 강퇴할 사용자 id 저장.
+								 message = invitedUser+"님이 초대되었습니다.";
+								 //sql 넣기
+								 saveMsg(message);
+								 
+								//강퇴로직
+								 sql = "insert into room_member (room_num,id) values (?,?)";
+									try {
+										pstmt = conn.prepareStatement(sql);
+										pstmt.setInt(1, chatRoom.getRoomNum());
+										pstmt.setString(2, invitedUser);
+										pstmt.executeUpdate(); 
+									} catch (SQLException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+							} else {
+								JOptionPane.showMessageDialog(null,
+										"강퇴 기능은 방장만 사용할 수 있습니다.", "에러",
+										JOptionPane.ERROR_MESSAGE);
+							}
+								
+						}
+								
+						
 					//소켓의 출력 스트림을 통해 서버에 메시지 전송
 					String messageToSend = chatRoom.getRoomNum() + "|" + thisUser.getId() + "|" + message;
 					
