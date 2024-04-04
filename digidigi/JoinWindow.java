@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Files;
 import java.sql.Connection;
@@ -27,7 +29,7 @@ public class JoinWindow extends JFrame implements ActionListener{
 		//회원가입창 Frame.
 		setTitle("Join");
 		setSize(400,550);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 		//JVM에서 완전한 창닫기. 닫기버튼 클릭시 창 종료.
 		
 		JPanel panel = new JPanel();
@@ -39,6 +41,7 @@ public class JoinWindow extends JFrame implements ActionListener{
 	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
 	    // 프레임의 아이콘으로 설정
 	    setIconImage(icon.getImage());
+	    setLocationRelativeTo(null);
 		setVisible(true);
 		//프레임을 화면에 보이도록 설정
 	}
@@ -109,6 +112,14 @@ public class JoinWindow extends JFrame implements ActionListener{
 		//버튼 클릭 시 이벤트 리스너.
 		joinButton.addActionListener(this);
 		panel.add(joinButton);
+		
+		this.addWindowListener(new WindowAdapter() {
+		    @Override
+		    public void windowClosing(WindowEvent e) {
+		        dispose();
+		        new LoginWindow(); // JoinWindow 닫힐 때 LoginWindow 열기
+		    }
+		});
 	}
 
 	

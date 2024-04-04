@@ -53,7 +53,8 @@ public class ChatRoomWindow extends JFrame {
 		this.chatRoom = chatRoom;
 		loadChat();
 		roomUI();
-
+		
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 
