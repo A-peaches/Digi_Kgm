@@ -218,11 +218,20 @@ public class ChatRoomWindow extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				String message = messageField.getText().trim();
 				
-				System.out.println(message);
+				System.out.println(message.substring(0, 3));
 				//메시지 읽어들어옴
 				saveMsg(message);
-				
-				if(!message.isEmpty()) {
+				if(message.startsWith("/강퇴 ")) {
+					 String[] parts = message.split(" ", 2); // 두 부분으로 분리
+					 String kickedUser = parts[1];  // 강퇴할 사용자 id 저장.
+					 System.out.println(kickedUser+"님이 강퇴되었습니다.");
+					
+					
+					 sql = "select id from room_member where room_num = ?";
+					
+					 		
+					
+				}else if(!message.isEmpty()) {
 					try {
 					//소켓의 출력 스트림을 통해 서버에 메시지 전송
 					String messageToSend = chatRoom.getRoomNum() + "|" + thisUser.getId() + "|" + message;
@@ -290,7 +299,7 @@ public class ChatRoomWindow extends JFrame{
 		        System.out.println("채팅방을 나갔습니다.");
 		        // 여기에 필요한 종료 로직 추가 (예: 리소스 정리)
 		    } catch (IOException e) {
-				// TODO Auto-generated catch block
+				// TODO Auto-generated catch block 
 				e.printStackTrace();
 			}
 		}

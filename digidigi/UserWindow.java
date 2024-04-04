@@ -182,11 +182,11 @@ public class UserWindow extends JFrame implements ActionListener {
 		//채팅방 생성.
 		createBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//방장에게 채팅방 이름 입력받기
+				String inputRoomName = JOptionPane.showInputDialog("채팅방 이름을 입력해주세요.");
+				if(inputRoomName != null && !inputRoomName.trim().isEmpty()) {
 				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
-				roomName = thisUser.getId()+",";
-				for (int i = 0; i < listModel.size(); i++) {
-					roomName += listModel.get(i)+",";
-				}
+				roomName = inputRoomName;
 				
 				conn = DbConnect.getConn().getDb();
 				sql = "insert into room (room_name) values (?)";
@@ -220,7 +220,7 @@ public class UserWindow extends JFrame implements ActionListener {
 				}
 
 				//room_member 추가.
-				System.out.println(roomNum);
+//				System.out.println(roomNum);
 				System.out.println(listModel.get(0));
 				for (int i = 0; i < listModel.size(); i++) {
 					sql = "insert into room_member (room_num, id) values (?, ?);";
@@ -248,6 +248,7 @@ public class UserWindow extends JFrame implements ActionListener {
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				}
 				}
 				
 				//초기화
