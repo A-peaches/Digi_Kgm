@@ -98,9 +98,8 @@ public class ChatServer {
 		    		String whisperMessage = parts[4];
 		    		if(isInChatRoom(receivedChatRoomId)) {
 		    			for(ClientHandler handler : clientHandlers) {
-		    				if(handler.userId.equals(receiverUserId)) {
-		    					handler.sendMessage(senderUserId + "(whisepr) > " + whisperMessage);
-		    					break;
+		    				if(handler.userId.equals(receiverUserId) || handler.userId.equals(senderUserId)) {
+		    					handler.sendMessage(senderUserId + " to " +receiverUserId + "(whisper) > " + whisperMessage);
 		    				}
 		    			}
 		    		}

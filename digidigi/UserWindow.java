@@ -24,6 +24,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -48,7 +50,7 @@ import javax.swing.UIManager;
 public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
 	private JList<ChatRoom> chatRoomList;
-	DefaultListModel<ChatRoom> chatListModel;
+	private DefaultListModel<ChatRoom> chatListModel;
 	private JButton btnChatList, btnAddChat, btnSet;
 	private CardLayout cardLayout;
 	private JPanel cardPanel;
@@ -57,7 +59,8 @@ public class UserWindow extends JFrame implements ActionListener {
 	private int roomNum;
 	private JLabel profile;
 	private byte[] imageData;
-	Notice notice;
+	private Notice notice;
+	private Timer timer;
 	PreparedStatement pstmt;
 	Connection conn;
 	
@@ -265,6 +268,8 @@ public class UserWindow extends JFrame implements ActionListener {
 
 	}
 
+	
+	
 	private void setupSettingPanel(JPanel settingPanel) {
 		settingPanel.setLayout(null);
 		
@@ -586,12 +591,15 @@ public class UserWindow extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if (e.getSource() == btnChatList) {
+			chatListModel.clear();
+			getRoomList();
 			cardLayout.show(cardPanel, "ChatList");
 			btnEnabled(false, true, true);
 		} else if (e.getSource() == btnAddChat) {
 			cardLayout.show(cardPanel, "AddChat");
 			btnEnabled(true, false, true);
 		} else if (e.getSource() == btnSet) {
+			loadPhoto();
 			cardLayout.show(cardPanel, "Setting");
 			btnEnabled(true, true, false);
 		}

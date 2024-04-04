@@ -485,6 +485,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 		btnSendNotice.setContentAreaFilled(false); //기존버튼디자인 제거 
 		btnSendNotice.setBorderPainted(false);
 		btnSendNotice.addActionListener(e -> sendNotice());
+		noticeField.addActionListener(e -> sendNotice());
 	}
 	
 	private void placeButton() {
@@ -603,6 +604,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 			cardLayout.show(cardPanel, "memberList");
 			btnEnabled(false, true, true);
 		} else if (e.getSource() == btnChatList) {
+			getNotice();
 			cardLayout.show(cardPanel, "chatList");
 			btnEnabled(true, false, true);
 		} else if (e.getSource() == btnSet) {

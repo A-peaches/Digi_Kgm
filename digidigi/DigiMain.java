@@ -34,7 +34,7 @@ public class DigiMain {
 		}
 	}
 	
-	public static void main(String []args ) {
+	public static void main(String []args) {
 
 		
 		DigiMain main = new DigiMain();
@@ -50,12 +50,13 @@ public class DigiMain {
 
 //
 //		ChatRoomWindow ch = new ChatRoomWindow(a, b);
-		new UserWindow(pipi);
-		new UserWindow(odeng);
-		new UserWindow(popo);
-	
-//		new AdminWindow(r);
-	
+//		new UserWindow(pipi);
+//		new UserWindow(odeng);
+//		new UserWindow(popo);
+//	
+//		new AdminWindow(admin);
+		new LoginWindow();
+		
 	}
 	
 
