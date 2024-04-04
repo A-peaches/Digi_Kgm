@@ -19,8 +19,8 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-public class ChatRoomWindow extends JFrame{
-	
+public class ChatRoomWindow extends JFrame {
+
 	private User thisUser;
 	private ChatRoom chatRoom;
 	private Socket socket;
@@ -29,22 +29,24 @@ public class ChatRoomWindow extends JFrame{
 	private JButton sendButton;
 	private JButton searchButton;
 	private String sql;
+	private String messageToSend;
+	private int manager;
+	private PrintWriter out;
 	PreparedStatement pstmt;
 	Connection conn;
-	
-	
-	public ChatRoomWindow( User user, ChatRoom chatRoom) {
-		this(null,user,chatRoom);
-		//UI확인용 생성자
+
+	public ChatRoomWindow(User user, ChatRoom chatRoom) {
+		this(null, user, chatRoom);
+		// UI확인용 생성자
 	}
-	
+
 	public ChatRoomWindow(Socket socket, User user, ChatRoom chatRoom) {
-		
+
 		conn = DbConnect.getConn().getDb();
 		chatArea = new JTextArea();
 		chatArea.setEditable(false);// 편집불가
-		//메시지 받을 부분 생성
-		
+		// 메시지 받을 부분 생성
+
 		new MessageListener(socket, chatArea).start();
 		this.socket = socket;
 		this.thisUser = user;
@@ -52,18 +54,16 @@ public class ChatRoomWindow extends JFrame{
 		loadChat();
 		roomUI();
 		
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 
-
 	private void roomUI() {
-		setTitle(chatRoom.getRoomName() + " - " + thisUser.getId()); //채팅방 이름과 현재 접속 id 
-		setSize(400,550);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //종료옵션
-		
-		
-		
-		//채팅방 종료시 socket close.
+		setTitle(chatRoom.getRoomName() + " - " + thisUser.getId()); // 채팅방 이름과 현재 접속 id
+		setSize(400, 550);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // 종료옵션
+
+		// 채팅방 종료시 socket close.
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -78,67 +78,72 @@ public class ChatRoomWindow extends JFrame{
 			}
 
 		});
-	    placeRoom();
+		placeRoom();
 	}
-	
+
+	//귓속말은 프라이버시. admin조회불가.
 	private void loadChat() {
 		chatArea.setText("");
+
+		//select id,chat from room_chat where room_num = 18 and DATE(send_date) = '2024-04-04'
+		//		and (whisper_id is Null OR whisper_id = 'popo'); 
 		
-		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = CURDATE() ";
-		
+		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = CURDATE() "
+				+ "and (whisper_id is Null OR whisper_id = ?)";
+
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, chatRoom.getRoomNum());
-			
+			pstmt.setString(2,thisUser.getId());
 			ResultSet rs = pstmt.executeQuery();
-			
-			
+
 			while (rs.next()) {
-				
+
 				String id = rs.getString("id");
 				String chat = rs.getString("chat");
-				
+
 				chatArea.append(id + " > " + chat + "\n");
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private void loadChatHistoryForDate(String inputDate) {
 		chatArea.setText("");
-		
-		
-		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = ?"; // '2024-04-03 형태가능'' 
+
+		sql = "select id,chat from room_chat where room_num = ? and DATE(send_date) = ? "
+				+ "and (whisper_id is Null OR whisper_id = ?)";  // '2024-04-03 형태가능''
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, chatRoom.getRoomNum());
 			pstmt.setString(2, inputDate);
-			
+			pstmt.setString(3,thisUser.getId());
+
 			ResultSet rs = pstmt.executeQuery();
 			boolean hasData = false;
 			while (rs.next()) {
-				
+
 				hasData = true;
 				String id = rs.getString("id");
 				String chat = rs.getString("chat");
-				
+
 				chatArea.append(id + " > " + chat + "\n");
 			}
-			
-	        if (!hasData) {
-	            // 조회된 데이터가 없을 경우 메시지 표시
-	            chatArea.append(" 대화내용이 없습니다!");
-	        }
-	        
+
+			if (!hasData) {
+				// 조회된 데이터가 없을 경우 메시지 표시
+				chatArea.append(" 대화내용이 없습니다!");
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private void placeRoom() {
 		ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
 	    // 프레임의 아이콘으로 설정
@@ -182,10 +187,19 @@ public class ChatRoomWindow extends JFrame{
 		        
 		    }
 		});
-
-		// 복구 버튼 클릭 시 동작 (검색 버튼의 라벨을 '복구'로 바꾼 후 같은 버튼으로 처리)
-		searchButton.addActionListener(e -> {
-		  
+		ImageIcon helpIcon = new ImageIcon(getClass().getResource("/css/help.png"));
+		JButton helpButton = new JButton(helpIcon);
+		helpButton.setBounds(269, 10, 30, 30);
+		helpButton.setContentAreaFilled(false); // 기존 버튼 디자인 제거
+		helpButton.setBorderPainted(false); // 테두리 제거
+		add(helpButton);
+		
+		helpButton.addActionListener(e -> {
+				JOptionPane.showMessageDialog(this,
+				        "1. 강퇴: /강퇴 + 사용자ID\n2. 초대: /초대 + 사용자ID\n"
+				        + "3. 귓속말: /w + 사용자ID + 대화내용\n* 강퇴와 초대는 방장만 가능합니다.",
+				        "digidigi Talk 도움말", // 대화상자 제목
+				        JOptionPane.INFORMATION_MESSAGE);			
 		});
 		
 		//채팅 영역 생성
@@ -216,80 +230,182 @@ public class ChatRoomWindow extends JFrame{
 		
 		sendButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String message = messageField.getText().trim();
-				
-				System.out.println(message);
-				//메시지 읽어들어옴
-				saveMsg(message);
-				
-				if(!message.isEmpty()) {
-					try {
-					//소켓의 출력 스트림을 통해 서버에 메시지 전송
-					String messageToSend = chatRoom.getRoomNum() + "|" + thisUser.getId() + "|" + message;
-					
-					PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
-					out.println(messageToSend);
-					
-					//메시지필드 초기화
-					messageField.setText("");
-					
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} 
-				
-				}
+				sendMsg();
 			}
-
-
 		});
 		
+		messageField.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	sendMsg(); // 별도로 분리한 메시지 전송 메서드 호출
+		    }
+		});
 		
 	}
 	
-	//메시지 db밀어넣기 
+
+	private void sendMsg() {
+		String message = messageField.getText().trim();
+		
+		//메시지 읽어들어옴
+		
+		if(!message.isEmpty()) {
+			try {
+				sql = "select manager from room_member where id = ? and room_num = ?";
+				try {
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1,thisUser.getId());
+					pstmt.setInt(2,chatRoom.getRoomNum());
+					
+					ResultSet rs = pstmt.executeQuery();
+					while(rs.next()) {
+						manager = rs.getInt("manager");
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+
+				message = kickInvite(message);
+
+				if (message.startsWith("/w")) {
+					int firstSpaceIndex = message.indexOf(" ", 3); // 첫번째공백기준으로 나오는 귓속말대상자
+					if (firstSpaceIndex != -1) {
+						String whisperUserId = message.substring(3, firstSpaceIndex); // 귓속말대상자
+						String whisperMessage = message.substring(firstSpaceIndex + 1); // 귓속말 메시지
+
+						messageToSend = "WHISPER|" + chatRoom.getRoomNum() + "|" + thisUser.getId() + "|"
+								+ whisperUserId + "|" + whisperMessage;
+						
+						saveWhisperMsg(whisperUserId, whisperMessage);
+					}
+				} else {
+					saveMsg(message);
+					// 소켓의 출력 스트림을 통해 서버에 메시지 전송
+					messageToSend = chatRoom.getRoomNum() + "|" + thisUser.getId() + "|" + message;
+
+				}
+				out = new PrintWriter(socket.getOutputStream(), true);
+				out.println(messageToSend);
+
+				// 메시지필드 초기화
+				messageField.setText("");
+			}
+
+		 catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 
+		
+		}
+	}
+	
+	private String kickInvite(String message) {
+		if (message.startsWith("/강퇴 ")) {
+			if (manager == 1) {
+				String[] parts = message.split(" ", 2);
+				String kickedUser = parts.length > 1 ? parts[1] : "";
+				message = kickedUser + "님이 강퇴되었습니다.";
+	
+
+				sql = "delete from room_member where id = ? and room_num = ?";
+				try {
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, kickedUser);
+					pstmt.setInt(2, chatRoom.getRoomNum());
+					pstmt.executeUpdate();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "강퇴 기능은 방장만 사용할 수 있습니다.", "에러", JOptionPane.ERROR_MESSAGE);
+				
+			}
+		} else if (message.startsWith("/초대 ")) {
+			if (manager == 1) {
+				String[] parts = message.split(" ", 2);
+				String invitedUser = parts.length > 1 ? parts[1] : "";
+				message = invitedUser + "님이 초대되었습니다.";
+
+
+				sql = "insert into room_member (room_num,id) values (?,?)";
+				try {
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, chatRoom.getRoomNum());
+					pstmt.setString(2, invitedUser);
+					pstmt.executeUpdate();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "초대 기능은 방장만 사용할 수 있습니다.", "에러", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return message;
+	}
+
+	// 메시지 db밀어넣기
 	private void saveMsg(String message) {
 		sql = "insert into room_chat \r\n" // "(14, 'pipi', '삐!!!!!!!');"
 				+ "(room_num, id, chat) values \r\n" + "(?, ?, ?)";
-		
+
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, chatRoom.getRoomNum());
 			pstmt.setString(2, thisUser.getId());
 			pstmt.setString(3, message);
 			pstmt.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 	}
-	//메시지 리스너 쓰레드
+	
+	private void saveWhisperMsg(String whisperUserId, String message) {
+		sql = "insert into room_chat \r\n" // "(14, 'pipi', '삐!!!!!!!');"
+				+ "(room_num, id, chat,whisper_id) values \r\n" + "(?, ?, ?, ?)";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, chatRoom.getRoomNum());
+			pstmt.setString(2, thisUser.getId());
+			pstmt.setString(3,"(whisper)"+message);
+			pstmt.setString(4, whisperUserId);
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
+	// 메시지 리스너 쓰레드
 	private class MessageListener extends Thread {
 		private Socket socket;
 		private JTextArea chatArea;
-		
-		public MessageListener(Socket socket,JTextArea chatArea) {
+
+		public MessageListener(Socket socket, JTextArea chatArea) {
 			this.socket = socket;
 			this.chatArea = chatArea;
 		}
-		
+
 		@Override
 		public void run() {
-			 try {
+			try {
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				String message;
-				
-				while((message = in.readLine()) != null ) {
+
+				while ((message = in.readLine()) != null) {
 					String finalMessage = message;
-					SwingUtilities.invokeLater(()-> chatArea.append(finalMessage + "\n"));
+					SwingUtilities.invokeLater(() -> chatArea.append(finalMessage + "\n"));
 				}
 			} catch (SocketException e) {
-		        System.out.println("채팅방을 나갔습니다.");
-		        // 여기에 필요한 종료 로직 추가 (예: 리소스 정리)
-		    } catch (IOException e) {
+				System.out.println("채팅방을 나갔습니다.");
+				// 여기에 필요한 종료 로직 추가 (예: 리소스 정리)
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

@@ -88,16 +88,38 @@ public class ChatServer {
 		}
 		private void handleIncomingMessage(String message) {
 		    // 메시지에서  채팅방 ID, 사용자 ID, 메시지 본문 분리 (필요한 경우)
-		    String[] parts = message.split("\\|", 3);
-		    String receivedChatRoomId = parts.length > 0 ? parts[0] : "";
-		    String receivedUserId= parts.length > 1 ? parts[1] : "";
-		    String messageText = parts.length > 2 ? parts[2] : "";
+		    String[] parts = message.split("\\|");
+		    if(parts.length > 0) {
+		    	String messageType = parts[0];
+		    	if("WHISPER".equals(messageType) && parts.length >= 5) {
+		    		String receivedChatRoomId = parts[1];
+		    		String senderUserId = parts[2];
+		    		String receiverUserId = parts[3];
+		    		String whisperMessage = parts[4];
+		    		if(isInChatRoom(receivedChatRoomId)) {
+		    			for(ClientHandler handler : clientHandlers) {
+		    				if(handler.userId.equals(receiverUserId) || handler.userId.equals(senderUserId)) {
+		    					handler.sendMessage(senderUserId + " to " +receiverUserId + "(whisper) > " + whisperMessage);
+		    				}
+		    			}
+		    		}
+		    		
+		    	}
+		    } 
+		    
+		    if (parts.length >=3) {
+		    String receivedChatRoomId = parts[0];
+		    String receivedUserId= parts[1];
+		    String messageText = parts[2];
 
 //		     현재 핸들러가 해당 채팅방의 메시지를 처리해야 할 경우
 		    if (isInChatRoom(receivedChatRoomId)) {
 		        for (ClientHandler handler : clientHandlers) {
 		            if (handler.isInChatRoom(receivedChatRoomId)) {
 		                handler.sendMessage(receivedUserId+" > "+messageText); // 메시지 본문만 전송
+		    
+		    }
+		
 		            }
 		        }
 

@@ -97,6 +97,13 @@ public class LoginWindow extends JFrame implements ActionListener {
 		pwField = new JPasswordField(20);
 		pwField.setBounds(130, 260, 165, 25);
 		panel.add(pwField);
+		
+		pwField.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        login(); // 로그인 처리를 위한 별도의 메서드 호출
+		    }
+		});
 
 		// 로그인 버튼 생성 및 위치 생성.
 		ImageIcon loginIcon = new ImageIcon(getClass().getResource("/css/login.png"));
@@ -123,86 +130,95 @@ public class LoginWindow extends JFrame implements ActionListener {
 
 	}
 
+	
+	public void login() {
+		String id = idField.getText();
+		char[] charPw = pwField.getPassword(); // getPassword는 char타입으로만 get가능.
+		String pw = new String(charPw); // String type으로 전환.
+
+		conn = DbConnect.getConn().getDb();
+		sql = "select cut_off,admin as admin from user where id=? and pw=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, id);
+			pstmt.setString(2, pw);
+
+			try (ResultSet rs1 = pstmt.executeQuery()) {
+				if (rs1.next()) {
+					int cut_off = rs1.getInt("cut_off");
+					int admin = rs1.getInt("admin");
+					if (admin == 0 && cut_off == 0) { // 관리자가 아닐때~
+						JOptionPane.showMessageDialog(null, "로그인에 성공하였습니다!", "성공",
+								JOptionPane.INFORMATION_MESSAGE);
+
+						// 객체생성하기.
+						sql = "select * from user where id=?";
+						pstmt = conn.prepareStatement(sql);
+						pstmt.setString(1, id);
+						ResultSet rs2 = pstmt.executeQuery();
+
+						while (rs2.next()) {
+							nickName = rs2.getString(3);
+							photo = rs2.getBytes(4);
+						}
+
+						User thisUser = new User(id, pw, nickName, photo);
+						
+						//창넘어가면서 User 전달하기,
+						UserWindow userWindow = new UserWindow(thisUser);
+						dispose();
+						
+						System.out.println("현재 로그인정보는 ID :"+ thisUser.getId() +"입니다.");
+					} else if(admin == 0 && cut_off == 1){
+						JOptionPane.showMessageDialog(null,
+								"관리자에 의하여 로그인이 차단되었습니다. \n 문의 - > email:digidigi@digi.com", "에러",
+								JOptionPane.ERROR_MESSAGE);
+						
+					}else if(admin == 1) {
+						JOptionPane.showMessageDialog(null, "관리자로 로그인하셨습니다!", "성공", 
+								JOptionPane.INFORMATION_MESSAGE);
+
+						// 객체생성하기.
+						sql = "select * from user where id=?";
+						pstmt = conn.prepareStatement(sql);
+						pstmt.setString(1, id);
+						ResultSet rs2 = pstmt.executeQuery();
+
+						while (rs2.next()) {
+							nickName = rs2.getString(3);
+							photo = rs2.getBytes(4);
+						}
+
+						User thisUser = new User(id, pw, nickName, photo);
+						
+						//창넘어가면서 User 전달하기,
+						AdminWindow adminWindow = new AdminWindow(thisUser);
+						dispose();
+						
+						System.out.println("현재 로그인정보는 ID :"+ thisUser.getId() +"입니다.");
+					}
+				} else {
+					 // 사용자 정보가 데이터베이스에 없는 경우
+                    JOptionPane.showMessageDialog(null,
+                            "ID or Password Error! \n 회원가입이 안되어있다면, 먼저 진행해주세요.", "에러",
+                            JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+
+
+	
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == loginButton) {
-			String id = idField.getText();
-			char[] charPw = pwField.getPassword(); // getPassword는 char타입으로만 get가능.
-			String pw = new String(charPw); // String type으로 전환.
-
-			conn = DbConnect.getConn().getDb();
-			sql = "select cut_off,admin as admin from user where id=? and pw=?";
-
-			try {
-				pstmt = conn.prepareStatement(sql);
-				pstmt.setString(1, id);
-				pstmt.setString(2, pw);
-
-				try (ResultSet rs1 = pstmt.executeQuery()) {
-					if (rs1.next()) {
-						int cut_off = rs1.getInt("cut_off");
-						int admin = rs1.getInt("admin");
-						if (admin == 0 && cut_off == 0) { // 관리자가 아닐때~
-							JOptionPane.showMessageDialog(null, "로그인에 성공하였습니다!", "성공",
-									JOptionPane.INFORMATION_MESSAGE);
-
-							// 객체생성하기.
-							sql = "select * from user where id=?";
-							pstmt = conn.prepareStatement(sql);
-							pstmt.setString(1, id);
-							ResultSet rs2 = pstmt.executeQuery();
-
-							while (rs2.next()) {
-								nickName = rs2.getString(3);
-								photo = rs2.getBytes(4);
-							}
-
-							User thisUser = new User(id, pw, nickName, photo);
-							
-							//창넘어가면서 User 전달하기,
-							UserWindow userWindow = new UserWindow(thisUser);
-							dispose();
-							
-							System.out.println("현재 로그인정보는 ID :"+ thisUser.getId() +"입니다.");
-						} else if(admin == 0 && cut_off == 1){
-							JOptionPane.showMessageDialog(null,
-									"관리자에 의하여 로그인이 차단되었습니다. \n 문의 - > email:digidigi@digi.com", "에러",
-									JOptionPane.ERROR_MESSAGE);
-							
-						}else if(admin == 1) {
-							JOptionPane.showMessageDialog(null, "관리자로 로그인하셨습니다!", "성공", 
-									JOptionPane.INFORMATION_MESSAGE);
-
-							// 객체생성하기.
-							sql = "select * from user where id=?";
-							pstmt = conn.prepareStatement(sql);
-							pstmt.setString(1, id);
-							ResultSet rs2 = pstmt.executeQuery();
-
-							while (rs2.next()) {
-								nickName = rs2.getString(3);
-								photo = rs2.getBytes(4);
-							}
-
-							User thisUser = new User(id, pw, nickName, photo);
-							
-							//창넘어가면서 User 전달하기,
-							AdminWindow adminWindow = new AdminWindow(thisUser);
-							dispose();
-							
-							System.out.println("현재 로그인정보는 ID :"+ thisUser.getId() +"입니다.");
-						}
-					} else {
-						 // 사용자 정보가 데이터베이스에 없는 경우
-	                    JOptionPane.showMessageDialog(null,
-	                            "ID or Password Error! \n 회원가입이 안되어있다면, 먼저 진행해주세요.", "에러",
-	                            JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			login();
 		} else if (e.getSource() == joinButton) {
 			setLocationRelativeTo(null);
 			JoinWindow joinwindow = new JoinWindow();

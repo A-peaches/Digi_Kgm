@@ -24,6 +24,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -48,7 +50,7 @@ import javax.swing.UIManager;
 public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
 	private JList<ChatRoom> chatRoomList;
-	DefaultListModel<ChatRoom> chatListModel;
+	private DefaultListModel<ChatRoom> chatListModel;
 	private JButton btnChatList, btnAddChat, btnSet;
 	private CardLayout cardLayout;
 	private JPanel cardPanel;
@@ -57,15 +59,17 @@ public class UserWindow extends JFrame implements ActionListener {
 	private int roomNum;
 	private JLabel profile;
 	private byte[] imageData;
-	Notice notice;
+	private Notice notice;
+	private Timer timer;
 	PreparedStatement pstmt;
 	Connection conn;
 	
 
 	public UserWindow(User user) {
+		conn = DbConnect.getConn().getDb();
 		thisUser = user;
 		// 채팅방 목록 창.
-		setTitle("digidigi Talk");
+		setTitle("digidigi Talk" + " - " + thisUser.getId());
 		//창크기
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치
@@ -172,9 +176,33 @@ public class UserWindow extends JFrame implements ActionListener {
 		addBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String id = RoomNameField.getText();
+				String searchId = null;
 				if (!id.isEmpty()) {
-					listModel.addElement(id);
-					RoomNameField.setText("");
+					sql = "select id from User where id =?";
+					try {
+						pstmt = conn.prepareStatement(sql);
+						pstmt.setString(1, id);
+						ResultSet rs = pstmt.executeQuery();
+						
+						while (rs.next()) {
+							searchId = rs.getString("id");
+						}
+						
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					if(id.equals(searchId)) {
+						listModel.addElement(id);
+						RoomNameField.setText("");
+					} else {
+						JOptionPane.showMessageDialog(null,
+								"존재하지 않는 ID입니다!", "에러",
+								JOptionPane.ERROR_MESSAGE);
+						RoomNameField.setText("");
+					}
+
 				}
 			}
 		});
@@ -182,13 +210,13 @@ public class UserWindow extends JFrame implements ActionListener {
 		//채팅방 생성.
 		createBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//방장에게 채팅방 이름 입력받기
+				String inputRoomName = JOptionPane.showInputDialog("채팅방 이름을 입력해주세요.");
+				if(inputRoomName != null && !inputRoomName.trim().isEmpty()) {
 				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
-				roomName = thisUser.getId()+",";
-				for (int i = 0; i < listModel.size(); i++) {
-					roomName += listModel.get(i)+",";
-				}
+				roomName = inputRoomName;
 				
-				conn = DbConnect.getConn().getDb();
+
 				sql = "insert into room (room_name) values (?)";
 				try {
 					pstmt = conn.prepareStatement(sql);
@@ -220,7 +248,7 @@ public class UserWindow extends JFrame implements ActionListener {
 				}
 
 				//room_member 추가.
-				System.out.println(roomNum);
+//				System.out.println(roomNum);
 				System.out.println(listModel.get(0));
 				for (int i = 0; i < listModel.size(); i++) {
 					sql = "insert into room_member (room_num, id) values (?, ?);";
@@ -249,6 +277,7 @@ public class UserWindow extends JFrame implements ActionListener {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				}
 				
 				//초기화
 				listModel.clear();
@@ -264,6 +293,8 @@ public class UserWindow extends JFrame implements ActionListener {
 
 	}
 
+	
+	
 	private void setupSettingPanel(JPanel settingPanel) {
 		settingPanel.setLayout(null);
 		
@@ -316,7 +347,8 @@ public class UserWindow extends JFrame implements ActionListener {
 		        if (result == JFileChooser.APPROVE_OPTION) {
 		            File selectFile = add.getSelectedFile();
 		            try {
-		                Image image = ImageIO.read(selectFile);
+		                Image originalImage = ImageIO.read(selectFile);
+		                Image image = originalImage.getScaledInstance(profile.getWidth(), profile.getHeight(), Image.SCALE_SMOOTH);
 		                imageData = Files.readAllBytes(selectFile.toPath());
 		                profile.setIcon(new ImageIcon(image));
 		                profile.setText("");
@@ -532,7 +564,6 @@ public class UserWindow extends JFrame implements ActionListener {
 		try {
 			pstmt = conn.prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();
-			
 			if(rs.next()) {
 				notice.setNotice_post(rs.getString("notice_post"));
 				notice.setNotice_date(rs.getString("send_date"));
@@ -585,12 +616,16 @@ public class UserWindow extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if (e.getSource() == btnChatList) {
+			chatListModel.clear();
+			getNotice();
+			getRoomList();
 			cardLayout.show(cardPanel, "ChatList");
 			btnEnabled(false, true, true);
 		} else if (e.getSource() == btnAddChat) {
 			cardLayout.show(cardPanel, "AddChat");
 			btnEnabled(true, false, true);
 		} else if (e.getSource() == btnSet) {
+			loadPhoto();
 			cardLayout.show(cardPanel, "Setting");
 			btnEnabled(true, true, false);
 		}
