@@ -322,7 +322,8 @@ public class UserWindow extends JFrame implements ActionListener {
 		        if (result == JFileChooser.APPROVE_OPTION) {
 		            File selectFile = add.getSelectedFile();
 		            try {
-		                Image image = ImageIO.read(selectFile);
+		                Image originalImage = ImageIO.read(selectFile);
+		                Image image = originalImage.getScaledInstance(profile.getWidth(), profile.getHeight(), Image.SCALE_SMOOTH);
 		                imageData = Files.readAllBytes(selectFile.toPath());
 		                profile.setIcon(new ImageIcon(image));
 		                profile.setText("");

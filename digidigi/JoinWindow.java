@@ -121,6 +121,13 @@ public class JoinWindow extends JFrame implements ActionListener{
 		String pw = new String(charPw); // String type으로 전환.
 		String nickName = nickField.getText();
 		
+		if(pw.isEmpty() || id.isEmpty() || nickName.isEmpty()) {
+			 JOptionPane.showMessageDialog(null,
+                     "ID , PW , NickName를 모두 입력해주세요! ", "에러",
+                     JOptionPane.ERROR_MESSAGE);
+			 
+			 return;
+		}
 		conn = DbConnect.getConn().getDb();
 		
 		sql = "insert into user (id, pw, nickName, photo) values (?,?,?,?)";
@@ -150,8 +157,9 @@ public class JoinWindow extends JFrame implements ActionListener{
 		            File selectFile = add.getSelectedFile();
 		            try {
 		                // 선택한 이미지 파일 로드
-		                Image image = ImageIO.read(selectFile);
+		                Image originalImage  = ImageIO.read(selectFile);
 		                // 이미지를 JLabel에 설정하여 표시
+		                Image image = originalImage.getScaledInstance(profile.getWidth(), profile.getHeight(), Image.SCALE_SMOOTH);
 		                imageData = Files.readAllBytes(selectFile.toPath());
 		                profile.setIcon(new ImageIcon(image));
 		                profile.setText("");
