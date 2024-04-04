@@ -65,7 +65,7 @@ public class UserWindow extends JFrame implements ActionListener {
 	public UserWindow(User user) {
 		thisUser = user;
 		// 채팅방 목록 창.
-		setTitle("digidigi Talk");
+		setTitle("digidigi Talk" + " - " + thisUser.getId());
 		//창크기
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치

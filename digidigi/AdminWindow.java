@@ -71,7 +71,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 		
 		
 		// 채팅방 목록 창.
-		setTitle("digidigi Talk");
+		setTitle("digidigi Talk" + " - " + thisUser.getId());
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
