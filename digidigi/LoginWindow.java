@@ -135,7 +135,13 @@ public class LoginWindow extends JFrame implements ActionListener {
 		String id = idField.getText();
 		char[] charPw = pwField.getPassword(); // getPassword는 char타입으로만 get가능.
 		String pw = new String(charPw); // String type으로 전환.
-
+		if(id.isEmpty() || pw.isEmpty()) {
+			 JOptionPane.showMessageDialog(null,
+                     "ID , PW를 모두 입력해주세요! ", "에러",
+                     JOptionPane.ERROR_MESSAGE);
+			 
+			 return;
+		}
 		conn = DbConnect.getConn().getDb();
 		sql = "select cut_off,admin as admin from user where id=? and pw=?";
 

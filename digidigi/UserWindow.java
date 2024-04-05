@@ -53,6 +53,7 @@ public class UserWindow extends JFrame implements ActionListener {
 	private DefaultListModel<ChatRoom> chatListModel;
 	private JButton btnChatList, btnAddChat, btnSet;
 	private CardLayout cardLayout;
+	private JLabel noticeLabel;
 	private JPanel cardPanel;
 	private String sql;
 	private String roomName;
@@ -486,8 +487,8 @@ public class UserWindow extends JFrame implements ActionListener {
 		getNotice();
 		
 		//공지사항 표시할 JLabel 생성.
-		JLabel noticeLabel = new JLabel("<html>" + notice.getNotice_post() +'\n' +
-										notice.getNotice_date()+ "<html>");
+		noticeLabel = new JLabel("<html>" + notice.getNotice_post() +'\n' +
+				notice.getNotice_date()+ "<html>");
 		noticeLabel.setFont(noticeLabel.getFont().deriveFont(16f));
 		noticeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		noticeLabel.setBorder(BorderFactory.createTitledBorder("Notice"));
@@ -556,6 +557,13 @@ public class UserWindow extends JFrame implements ActionListener {
 
 	}
 	
+	private void updateNotice(JLabel noticeLabel) {
+		getNotice();
+
+		// 공지사항 표시할 JLabel 생성.
+		noticeLabel.setText("<html>" + notice.getNotice_post() + '\n' + notice.getNotice_date() + "<html>");
+	}
+
 	private void getNotice() {
 		notice = new Notice();
 		conn = DbConnect.getConn().getDb();
@@ -617,7 +625,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		// TODO Auto-generated method stub
 		if (e.getSource() == btnChatList) {
 			chatListModel.clear();
-			getNotice();
+			updateNotice(noticeLabel);
 			getRoomList();
 			cardLayout.show(cardPanel, "ChatList");
 			btnEnabled(false, true, true);

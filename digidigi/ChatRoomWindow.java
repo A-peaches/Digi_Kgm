@@ -32,6 +32,7 @@ public class ChatRoomWindow extends JFrame {
 	private String messageToSend;
 	private int manager;
 	private PrintWriter out;
+	private boolean isNull;
 	PreparedStatement pstmt;
 	Connection conn;
 
@@ -106,6 +107,24 @@ public class ChatRoomWindow extends JFrame {
 			}
 
 		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		String status = "< ";
+		sql = "select id from room_member where room_num=?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, chatRoom.getRoomNum());
+			ResultSet rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				status += rs.getString("id") + " ";
+			}
+			
+			chatArea.append("[   notice : 현재 채팅방의 참여자는 " +'\n'+ status +" > 입니다.    ]" +'\n');
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -267,6 +286,10 @@ public class ChatRoomWindow extends JFrame {
 
 
 				message = kickInvite(message);
+				
+				if(message.isEmpty()) {
+					return;
+				}
 
 				if (message.startsWith("/w")) {
 					int firstSpaceIndex = message.indexOf(" ", 3); // 첫번째공백기준으로 나오는 귓속말대상자
@@ -305,15 +328,30 @@ public class ChatRoomWindow extends JFrame {
 			if (manager == 1) {
 				String[] parts = message.split(" ", 2);
 				String kickedUser = parts.length > 1 ? parts[1] : "";
-				message = kickedUser + "님이 강퇴되었습니다.";
-	
 
-				sql = "delete from room_member where id = ? and room_num = ?";
+				
 				try {
+				sql = "select count(*) from room_member where id =? AND room_num =?";
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, kickedUser);
+				pstmt.setInt(2, chatRoom.getRoomNum());
+				ResultSet rs = pstmt.executeQuery();
+				
+				if(rs.next() && rs.getInt(1)>0) {
+					
+					message = kickedUser + "님이 강퇴되었습니다.";
+			
+					sql = "delete from room_member where id = ? and room_num = ?";
+				
 					pstmt = conn.prepareStatement(sql);
 					pstmt.setString(1, kickedUser);
 					pstmt.setInt(2, chatRoom.getRoomNum());
 					pstmt.executeUpdate();
+				}else {
+					 JOptionPane.showMessageDialog(null, kickedUser + " 사용자는 존재하지 않습니다.", "에러", JOptionPane.ERROR_MESSAGE);
+			            return ""; // 처리 중단
+				}
+				
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -325,15 +363,24 @@ public class ChatRoomWindow extends JFrame {
 			if (manager == 1) {
 				String[] parts = message.split(" ", 2);
 				String invitedUser = parts.length > 1 ? parts[1] : "";
-				message = invitedUser + "님이 초대되었습니다.";
-
-
-				sql = "insert into room_member (room_num,id) values (?,?)";
 				try {
+				sql = "SELECT COUNT(*) FROM user WHERE id = ?";
+		        pstmt = conn.prepareStatement(sql);
+		        pstmt.setString(1, invitedUser);
+		        ResultSet rs = pstmt.executeQuery();
+		        
+		        if (rs.next() && rs.getInt(1) >0){
+		        	sql = "insert into room_member (room_num,id) values (?,?)";
+		        	
+					message = invitedUser + "님이 초대되었습니다.";
 					pstmt = conn.prepareStatement(sql);
 					pstmt.setInt(1, chatRoom.getRoomNum());
 					pstmt.setString(2, invitedUser);
 					pstmt.executeUpdate();
+		        }else {
+		        	JOptionPane.showMessageDialog(null, invitedUser + " 사용자는 존재하지 않습니다.", "에러", JOptionPane.ERROR_MESSAGE);
+		            return ""; // 처리 중단
+		        }
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -341,6 +388,9 @@ public class ChatRoomWindow extends JFrame {
 				JOptionPane.showMessageDialog(null, "초대 기능은 방장만 사용할 수 있습니다.", "에러", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+		
+	
+			
 		return message;
 	}
 
