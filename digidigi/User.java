@@ -1,24 +1,25 @@
 package digidigi;
 
 public class User {
-	private String id;
-	private String pw;
-	private String nickName;
+	private String id; 
+	private String pw; 
+	private String nickName; 
 	private byte[] photo;
-	private boolean admin;
-	private boolean cutOff;
-	private boolean isLogin;
+	private boolean admin; //관리자 권한 여부
+	private boolean cutOff; //로그인 제한 여부
 
 	// constructor
 
 	public User(String id, String pw, String nickName) {
 		this(id, pw, nickName, null, false, false);
+		// id와 pw, nickName은 NOT NULL.
 	}
+	
 
 	public User(String id, String pw, String nickName, byte[] photo) {
 		this(id, pw, nickName, photo, false, false);
 	}
-	// id와 pw, nickName은 NOT NULL.
+
 
 	public User(String id, String pw, String nickName, byte[] photo, boolean admin, boolean cutOff) {
 		this.id = id;
@@ -77,14 +78,6 @@ public class User {
 
 	public void setCutOff(boolean cutOff) {
 		this.cutOff = cutOff;
-	}
-
-	public boolean isLogin() {
-		return isLogin;
-	}
-
-	public void setLogin(boolean isLogin) {
-		this.isLogin = isLogin;
 	}
 
 }

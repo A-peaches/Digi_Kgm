@@ -51,14 +51,15 @@ public class UserWindow extends JFrame implements ActionListener {
 	private User thisUser;
 	private JList<ChatRoom> chatRoomList;
 	private DefaultListModel<ChatRoom> chatListModel;
+	private DefaultListModel<String> listModel;
 	private JButton btnChatList, btnAddChat, btnSet;
 	private CardLayout cardLayout;
 	private JLabel noticeLabel;
 	private JPanel cardPanel;
 	private String sql;
 	private String roomName;
-	private int roomNum;
 	private JLabel profile;
+	private int roomNum;
 	private byte[] imageData;
 	private Notice notice;
 	private Timer timer;
@@ -67,31 +68,28 @@ public class UserWindow extends JFrame implements ActionListener {
 	
 
 	public UserWindow(User user) {
-		conn = DbConnect.getConn().getDb();
-		thisUser = user;
-		// 채팅방 목록 창.
-		setTitle("digidigi Talk" + " - " + thisUser.getId());
+		conn = DbConnect.getConn().getDb(); //db 연동
+		thisUser = user; //로그인한 유저 정보 넘겨받기
+		chatListModel = new DefaultListModel<>();
+		
+		setTitle("digidigi Talk" + " - " + thisUser.getId()); //현재 로그인한 유저 정보 출력
 		//창크기
 		setSize(400, 550);
 		setLocationRelativeTo(null); // 화면 중앙에 위치
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// JVM에서 완전한 창닫기. 닫기버튼 클릭시 창 종료.
-		chatListModel = new DefaultListModel<>();
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		// 닫기버튼 클릭시 창 종료.
+
 		
 		cardLayout = new CardLayout();
-		cardPanel = new JPanel(cardLayout);
+		cardPanel = new JPanel(cardLayout); 
 		cardPanel.setBackground(Color.WHITE);
 		
+		//화면 전환을 위한 cardLayout
 		JPanel chatListPanel = new JPanel();
 		JPanel addChatPanel = new JPanel();
 		JPanel settingPanel = new JPanel();
 
-		
-	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
-	    // 프레임의 아이콘으로 설정
-	    setIconImage(icon.getImage());
-		// 채팅방추가패널
-
+		//place component
 		setupChatListPanel(chatListPanel);
 		setupAddChatPanel(addChatPanel);
 		setupSettingPanel(settingPanel);
@@ -104,6 +102,7 @@ public class UserWindow extends JFrame implements ActionListener {
 
 	}
 
+	//채팅방 추가
 	private void setupAddChatPanel(JPanel addChatPanel) {
 
 		// 패널레이아웃설정
@@ -127,20 +126,18 @@ public class UserWindow extends JFrame implements ActionListener {
 		inputAndInvitePanel.setBackground(Color.WHITE);
 		// ID입력 추가 부분
 
-		// 채팅방 이름 입력 필드
+		// ID 입력 필드
 		JPanel inputPanel = new JPanel(new FlowLayout());
-		JTextField RoomNameField = new JTextField(20);
-		RoomNameField.setFont(RoomNameField.getFont().deriveFont(16f));
-		inputPanel.add(RoomNameField);
+		JTextField idField = new JTextField(20);
+		idField.setFont(idField.getFont().deriveFont(16f));
+		inputPanel.add(idField);
 		inputPanel.setBackground(Color.WHITE);
 		
 		// ID추가 버튼
-		
 		ImageIcon addIcon = new ImageIcon(getClass().getResource("/css/bigadd2.png"));
 		JButton addBtn = new JButton(addIcon);
 		addBtn.setContentAreaFilled(false); //기존버튼디자인 제거 
-		addBtn
-		.setBorderPainted(false); // 기존버튼디자인 제거
+		addBtn.setBorderPainted(false); // 기존버튼디자인 제거
 		inputPanel.add(addBtn);
 
 		inputAndInvitePanel.add(inputPanel, BorderLayout.SOUTH);
@@ -149,8 +146,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		centerPanel.add(inputAndInvitePanel, BorderLayout.NORTH);
 
 		// 입력된 ID들을 보여줄 리스트와 스크롤 팬
-		DefaultListModel<String> listModel = new DefaultListModel<>();
-
+		listModel = new DefaultListModel<>();
 		JList<String> idList = new JList<>(listModel);
 		JScrollPane listScrollPane = new JScrollPane(idList);
 
@@ -163,8 +159,8 @@ public class UserWindow extends JFrame implements ActionListener {
 		// 버튼 패널
 		JPanel btnPanel = new JPanel(new FlowLayout());
 		btnPanel.setBackground(Color.WHITE);
-		// 생성 버튼
 		
+		// 생성 버튼
 		ImageIcon cerateIcon = new ImageIcon(getClass().getResource("/css/Create.png"));
 		JButton createBtn = new JButton(cerateIcon);
 		createBtn.setContentAreaFilled(false); //기존버튼디자인 제거 
@@ -174,9 +170,46 @@ public class UserWindow extends JFrame implements ActionListener {
 
 		addChatPanel.add(btnPanel, BorderLayout.SOUTH);
 
+		//id작성 후 add버튼 클릭 or 엔터클릭시.
 		addBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String id = RoomNameField.getText();
+				String id = idField.getText();
+				String searchId = null;
+				
+				//우선 일치한 id가 db에있는지 검색.
+				if (!id.isEmpty()) {
+					sql = "select id from User where id =?";
+					try {
+						pstmt = conn.prepareStatement(sql);
+						pstmt.setString(1, id);
+						ResultSet rs = pstmt.executeQuery();
+						
+						while (rs.next()) {
+							searchId = rs.getString("id");
+						}
+						
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					if(id.equals(searchId)) {
+						listModel.addElement(id);
+						idField.setText("");
+					} else {
+						JOptionPane.showMessageDialog(null,
+								"존재하지 않는 ID입니다!", "에러",
+								JOptionPane.ERROR_MESSAGE);
+						idField.setText("");
+					}
+
+				}
+			}
+		});
+		idField.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+				String id = idField.getText();
 				String searchId = null;
 				if (!id.isEmpty()) {
 					sql = "select id from User where id =?";
@@ -196,25 +229,25 @@ public class UserWindow extends JFrame implements ActionListener {
 					
 					if(id.equals(searchId)) {
 						listModel.addElement(id);
-						RoomNameField.setText("");
+						idField.setText("");
 					} else {
 						JOptionPane.showMessageDialog(null,
 								"존재하지 않는 ID입니다!", "에러",
 								JOptionPane.ERROR_MESSAGE);
-						RoomNameField.setText("");
+						idField.setText("");
 					}
 
 				}
 			}
 		});
-
-		//채팅방 생성.
+			
+		//채팅방 생성 버튼 클릭 시
 		createBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//방장에게 채팅방 이름 입력받기
 				String inputRoomName = JOptionPane.showInputDialog("채팅방 이름을 입력해주세요.");
 				if(inputRoomName != null && !inputRoomName.trim().isEmpty()) {
-				// thisUser를 방장으로 room을 생성하면서, id만큼 멤버등록.
+				//inputName이 null이 아니면,
 				roomName = inputRoomName;
 				
 
@@ -224,33 +257,24 @@ public class UserWindow extends JFrame implements ActionListener {
 					pstmt.setString(1, roomName);
 					pstmt.executeUpdate();//쿼리문실행
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}// 방정보 추가
 					
-				//방금 생 성된 room_num 갖고오기...
+				//방금 생성된 room_num 갖고오기...
 				sql = "select room_num from room where room_name = ?";
 				try {
 					pstmt = conn.prepareStatement(sql);
 					pstmt.setString(1, roomName);
 					ResultSet rs = pstmt.executeQuery();
 					
-					//chatRoomList - CHATROOM
 					while (rs.next()) {
-				        roomNum = rs.getInt(1); // 컬럼 이름으로 데이터 가져오기
-
+				        roomNum = rs.getInt(1); // roomNum 데이터 가져오기
 					}
-				    
-					
-					
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 
 				//room_member 추가.
-//				System.out.println(roomNum);
-				System.out.println(listModel.get(0));
 				for (int i = 0; i < listModel.size(); i++) {
 					sql = "insert into room_member (room_num, id) values (?, ?);";
 					try {
@@ -280,10 +304,9 @@ public class UserWindow extends JFrame implements ActionListener {
 				}
 				}
 				
-				//초기화
+				//List불러왔던 이력 초기화 후 생성 채팅방 반영하여 다시 load하기
 				listModel.clear();
 				chatListModel.clear();
-				//ChatList로 돌아가기.
 				getRoomList();
 				cardLayout.show(cardPanel, "ChatList");
 				btnEnabled(false, true, true);
@@ -291,11 +314,10 @@ public class UserWindow extends JFrame implements ActionListener {
 		});
 
 
-
+		
 	}
 
-	
-	
+	//프로필 설정
 	private void setupSettingPanel(JPanel settingPanel) {
 		settingPanel.setLayout(null);
 		
@@ -313,11 +335,14 @@ public class UserWindow extends JFrame implements ActionListener {
 		nickLabel.setFont(nickLabel.getFont().deriveFont(14f));
 		settingPanel.add(nickLabel);
 
+		//프로필 영역
 		profile = new JLabel("profile");
 		profile.setFont(profile.getFont().deriveFont(12f));
 		profile.setBounds(130,140,120,120);
 		settingPanel.add(profile);
+		//db에 저장된 사진 불러오기
 		loadPhoto();
+		
 		
 		ImageIcon proIcon = new ImageIcon(getClass().getResource("/css/addphoto.png"));
 		JButton proButton = new JButton(proIcon);
@@ -364,6 +389,7 @@ public class UserWindow extends JFrame implements ActionListener {
 		// 확인 버튼 이벤트
 		okButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	//사진 업데이트
 		        if (imageData == null) {
 		            JOptionPane.showMessageDialog(null, "image를 첨부해주세요 ! ", "에러", JOptionPane.ERROR_MESSAGE);
 		        } else {
@@ -387,7 +413,6 @@ public class UserWindow extends JFrame implements ActionListener {
 	//프로필 사진 불러오기 메서드 
 	private void loadPhoto() {
 		try {
-			conn = DbConnect.getConn().getDb();
             sql = "Select photo from user WHERE id=?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, thisUser.getId());
@@ -413,24 +438,28 @@ public class UserWindow extends JFrame implements ActionListener {
 	}
 	
 
-	// 폰트설정.
-
-	
+	//채팅방 목록 , 로그인시 디폴트 화면.
 	private void setupChatListPanel(JPanel chatListPanel) {
+		ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
+		// 프레임의 아이콘으로 설정
+		setIconImage(icon.getImage());
+		// 채팅방추가패널
 
 		chatListPanel.setLayout(new BorderLayout());
-		
-		//채팅방 목록 가져오기
+
+		// 채팅방 목록 가져오기
 		getRoomList();
 		
-		chatRoomList = new JList<>(chatListModel);
+		chatRoomList = new JList<>(chatListModel); 
+		//getRoomList 메서드에서 생성된 ListModel인 chatListModel를 JList로 담기.
 		
+		//chatRoomList는 GUI에 채팅방 목록을 표시하는 컴포넌트.
 		chatRoomList.setCellRenderer(new ListCellRenderer<ChatRoom>() {
             @Override
             public Component getListCellRendererComponent(
                     JList<? extends ChatRoom> list, ChatRoom value, int index, 
                     boolean isSelected, boolean cellHasFocus) {
-                
+                //컴포넌트 출력 항목 설정. 
                 DefaultListCellRenderer renderer = new DefaultListCellRenderer();
                 JLabel label = (JLabel) renderer.getListCellRendererComponent(
                         list, value, index, isSelected, cellHasFocus);
@@ -441,30 +470,26 @@ public class UserWindow extends JFrame implements ActionListener {
             }
             
         });
-		
-		
-		//채팅방 더블클릭시 Window
-		
-
-		// 폰트설정.
-
-		chatRoomList.setFixedCellHeight(50);
-		
-		chatRoomList.addMouseListener(new MouseAdapter() {
+		chatRoomList.setFixedCellHeight(50); //컴포넌트높이설정
+		//채팅방 더블클릭 시 이벤트처리
+		chatRoomList.addMouseListener(new MouseAdapter() { 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount()==2) {
-					ChatRoom selectedRoom = chatRoomList.getSelectedValue();
+					ChatRoom selectedRoom = chatRoomList.getSelectedValue(); 
+					//현재 클릭한 chatRoom객체를 담아옴
 					if(selectedRoom != null) {
-						//서버연결
 						Socket socket;
 						try {
-							socket = new Socket("192.168.0.83",3000);
+							socket = new Socket("192.168.0.83",3000); //서버에 연결하기 위한 소켓 생성 및 초기화
 							ChatRoomWindow chatRoomWindow = new ChatRoomWindow(socket, thisUser, selectedRoom);
-							PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+							//서버와 연결을 위한 소켓과, 유저정보와, 선택된 chatRoom의 정보를 넘겨주면서 채팅방 창 호출.
+							PrintWriter out = new PrintWriter(socket.getOutputStream(), true); 
+							//서버로 메시지를 전송할 수 있는 PrintWriter 객체 생성.
 							String initialMessage = selectedRoom.getRoomNum() + "|" + thisUser.getId();
-							out.println(initialMessage);
-							
+							// 현재 채팅방의 번호와 유저 아이디를 "|"로 구분하여 메시지생성.
+							out.println(initialMessage); // 서버로 메시지 전송.
+							// 현재 입장한 유저의 RoomNum와 ID 전달을 위한 초기 메시지 전송.
 							
 						} catch (IOException ex) {
 		                    ex.printStackTrace();
@@ -477,9 +502,11 @@ public class UserWindow extends JFrame implements ActionListener {
 				}
 			}
 		});
+		
 		JScrollPane scrollPane = new JScrollPane(chatRoomList);
+		//scroll 패널에 담기.
 		chatListPanel.add(scrollPane, BorderLayout.CENTER);
-		// chatRoomList출력.
+		//chatRoomList출력.
 		
 		
 		
@@ -509,7 +536,7 @@ public class UserWindow extends JFrame implements ActionListener {
 	}
 	
 	private void placeButton() {
-		//버튼추가.
+		//하단 버튼 추가.
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // 버튼을 3개 배치하기 위한 레이아웃.
 		buttonPanel.setBackground(Color.WHITE);
@@ -519,8 +546,8 @@ public class UserWindow extends JFrame implements ActionListener {
 		Image resizedImage = image.getScaledInstance(35, 30, Image.SCALE_SMOOTH); // 이미지 크기 조정
 		ImageIcon chatIcon = new ImageIcon(resizedImage); // 조정된 Image로 ImageIcon 재생성
 
-		btnChatList = new JButton(chatIcon);
-		btnChatList.setContentAreaFilled(false); //기존버튼디자인 제거 
+		btnChatList = new JButton(chatIcon); //채팅방 목록 카드레이아웃 호출 버튼
+		btnChatList.setContentAreaFilled(false);
 		btnChatList.setBorderPainted(false);
 		btnChatList.setOpaque(false);
 		btnChatList.setEnabled(false);
@@ -530,7 +557,9 @@ public class UserWindow extends JFrame implements ActionListener {
 		Image image2 = originalIcon2.getImage(); // ImageIcon에서 Image를 추출
 		Image resizedImage2 = image2.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // 이미지 크기 조정
 		ImageIcon addChat = new ImageIcon(resizedImage2); // 조정된 Image로 ImageIcon 재생성
-		btnAddChat = new JButton(addChat);
+		
+		
+		btnAddChat = new JButton(addChat); //채팅방 추가 카드레이아웃 호출 버튼
 		btnAddChat.setContentAreaFilled(false);
 		btnAddChat.setBorderPainted(false);
 		btnAddChat.setOpaque(false);
@@ -541,7 +570,8 @@ public class UserWindow extends JFrame implements ActionListener {
 		Image image3 = originalIcon3.getImage(); // ImageIcon에서 Image를 추출
 		Image resizedImage3 = image3.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // 이미지 크기 조정
 		ImageIcon setting = new ImageIcon(resizedImage3); // 조정된 Image로 ImageIcon 재생성
-		btnSet = new JButton(setting);
+		
+		btnSet = new JButton(setting);  //프로필 설정 카드레이아웃 호출 버튼
 		btnSet.setContentAreaFilled(false);
 		btnSet.setBorderPainted(false);
 		btnSet.setOpaque(false);
@@ -585,26 +615,24 @@ public class UserWindow extends JFrame implements ActionListener {
 
 	}
 
+	//채팅방 정보 db 검색
 	public void getRoomList() {
-		conn = DbConnect.getConn().getDb();
 		
 		sql = "SELECT ROOM_NUM, ROOM_NAME FROM ROOM\r\n"
 				+ "WHERE ROOM_NUM IN (SELECT ROOM_NUM FROM ROOM_MEMBER WHERE ID = ?)";
 		
 		
-		try {
-			pstmt = conn.prepareStatement(sql);	//pstmt에 db에 sql 삽입
-			//pstmt.setString(1, thisUser.getId());
+		try { //현재 유저 id가 멤버로 들어가있는 roomNum와 roomName만 가져오기.
+			pstmt = conn.prepareStatement(sql);	
 			pstmt.setString(1, thisUser.getId());
 			
 			ResultSet rs = pstmt.executeQuery();
 			
 
 			while(rs.next()) {
+				//가지고 온 데이터 수만큼 
 				ChatRoom chatRoom = new ChatRoom(rs.getInt("ROOM_NUM"), rs.getString("ROOM_NAME"));
-				//MHS
-
-				chatListModel.add(chatListModel.getSize(), chatRoom);
+				chatListModel.add(chatListModel.getSize(), chatRoom); // chatRoom 객체 추가.
 				
 			}		
 		}
@@ -614,6 +642,7 @@ public class UserWindow extends JFrame implements ActionListener {
 	}
 
 
+	//하단 카드레이아웃 변경 시 setEnabled설정
 	public void btnEnabled(boolean chat, boolean add, boolean set) {
 		btnChatList.setEnabled(chat);
 		btnAddChat.setEnabled(add);
@@ -622,7 +651,6 @@ public class UserWindow extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		if (e.getSource() == btnChatList) {
 			chatListModel.clear();
 			updateNotice(noticeLabel);
@@ -630,6 +658,7 @@ public class UserWindow extends JFrame implements ActionListener {
 			cardLayout.show(cardPanel, "ChatList");
 			btnEnabled(false, true, true);
 		} else if (e.getSource() == btnAddChat) {
+			listModel.clear();
 			cardLayout.show(cardPanel, "AddChat");
 			btnEnabled(true, false, true);
 		} else if (e.getSource() == btnSet) {

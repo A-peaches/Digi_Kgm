@@ -30,7 +30,7 @@ public class JoinWindow extends JFrame implements ActionListener{
 		setTitle("Join");
 		setSize(400,550);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-		//JVM에서 완전한 창닫기. 닫기버튼 클릭시 창 종료.
+		//닫기버튼 클릭시 현재 창 종료.
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.WHITE);
@@ -38,9 +38,6 @@ public class JoinWindow extends JFrame implements ActionListener{
 		add(panel);
 		placeComponents(panel);//패널에 컴포넌트 배치
 		
-	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
-	    // 프레임의 아이콘으로 설정
-	    setIconImage(icon.getImage());
 	    setLocationRelativeTo(null);
 		setVisible(true);
 		//프레임을 화면에 보이도록 설정
@@ -48,6 +45,10 @@ public class JoinWindow extends JFrame implements ActionListener{
 
 	//패널에 컴포넌트들을 배치하는 메서드
 	private void placeComponents(JPanel panel) {
+	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
+	    // 프레임의 아이콘으로 설정
+	    setIconImage(icon.getImage());
+	    
 		//패널의 레이아웃을 null로 설정하여 수동으로 컴포넌트의 위치와 크기지정.
 		panel.setLayout(null);
 		
@@ -63,19 +64,19 @@ public class JoinWindow extends JFrame implements ActionListener{
 		profile.setBounds(165,90,80,80);
 		panel.add(profile);
 		
+		//사진 추가
 		ImageIcon addIcon = new ImageIcon(getClass().getResource("/css/add.png"));
 		proButton = new JButton(addIcon);
-		proButton.addActionListener(this);
-		
+		proButton.addActionListener(this); //사진추가 이벤트 리스너
 		proButton.setContentAreaFilled(false); //기존버튼디자인 제거 
 		proButton.setBorderPainted(false);
 		proButton.setOpaque(false);
 		proButton.setBounds(155,180,50,20);
 		panel.add(proButton);
+		
 		//ID라벨 생성
 		JLabel idLabel = new JLabel("ID :");
 		idLabel.setBounds(90,220,80,25);
-		//setBounds(x, y, w, h) x좌표, y좌표, 가로,세로 크기
 		panel.add(idLabel);
 		
 		//ID입력 필드 생성 및 위치 생성.
@@ -109,8 +110,7 @@ public class JoinWindow extends JFrame implements ActionListener{
 		joinButton.setBounds(150,360,80,90);
 		joinButton.setContentAreaFilled(false); //기존버튼디자인 제거 
 		joinButton.setBorderPainted(false); // 기존버튼디자인 제거
-		//버튼 클릭 시 이벤트 리스너.
-		joinButton.addActionListener(this);
+		joinButton.addActionListener(this); // 가입 버튼 이벤트리스너
 		panel.add(joinButton);
 		
 		this.addWindowListener(new WindowAdapter() {
@@ -120,26 +120,32 @@ public class JoinWindow extends JFrame implements ActionListener{
 		        new LoginWindow(); // JoinWindow 닫힐 때 LoginWindow 열기
 		    }
 		});
+		
+		
+		nickField.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        join(); //	NickName 에서 엔터 시 버튼 클릭과 동일한 효과.
+		    }
+		});
+
 	}
 
-	
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == joinButton) { //회원가입버튼 클릭시.
+	public void join() {
 		String id = idField.getText();
 		char[] charPw = pwField.getPassword(); // getPassword는 char타입으로만 get가능.
 		String pw = new String(charPw); // String type으로 전환.
 		String nickName = nickField.getText();
 		
-		if(pw.isEmpty() || id.isEmpty() || nickName.isEmpty()) {
+		if(pw.isEmpty() || id.isEmpty() || nickName.isEmpty()) { //유효성 검사
 			 JOptionPane.showMessageDialog(null,
                      "ID , PW , NickName를 모두 입력해주세요! ", "에러",
                      JOptionPane.ERROR_MESSAGE);
 			 
 			 return;
 		}
-		conn = DbConnect.getConn().getDb();
+		
+		conn = DbConnect.getConn().getDb(); //db 연결
 		
 		sql = "insert into user (id, pw, nickName, photo) values (?,?,?,?)";
 		
@@ -150,38 +156,50 @@ public class JoinWindow extends JFrame implements ActionListener{
 			pstmt.setString(3,nickName);
 			pstmt.setBytes(4,imageData);
 			
-			pstmt.executeUpdate();
+			pstmt.executeUpdate(); //db에 회원 정보 반영
 			
-            dispose();
+			JOptionPane.showMessageDialog(null, "회원가입에 성공하였습니다!", "성공",
+					JOptionPane.INFORMATION_MESSAGE);
+
+
+            dispose();// 로그인 창으로 이동
             LoginWindow loginWindow = new LoginWindow();
             
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
-		
-		} else if(e.getSource()==proButton) {
-			JFileChooser add = new JFileChooser();
-			int result = add.showOpenDialog(this);
-			  if (result == add.APPROVE_OPTION) {
-		            File selectFile = add.getSelectedFile();
-		            try {
-		                // 선택한 이미지 파일 로드
-		                Image originalImage  = ImageIO.read(selectFile);
-		                // 이미지를 JLabel에 설정하여 표시
-		                Image image = originalImage.getScaledInstance(profile.getWidth(), profile.getHeight(), Image.SCALE_SMOOTH);
-		                imageData = Files.readAllBytes(selectFile.toPath());
-		                profile.setIcon(new ImageIcon(image));
-		                profile.setText("");
+	}
 	
-		                
-		                
-		                } catch (Exception ex) {
-		                ex.printStackTrace();
-		            }
-			  }
+	public void addProfile() {
+		JFileChooser add = new JFileChooser(); //파일 선택 화면 호출
+		int result = add.showOpenDialog(this);
+		  if (result == add.APPROVE_OPTION) {
+	            File selectFile = add.getSelectedFile(); //선택된파일
+	            try {
+	                // 선택한 이미지 파일 로드
+	                Image originalImage  = ImageIO.read(selectFile); 
+	                // 이미지를 JLabel에 설정하여 표시
+	                Image image = originalImage.getScaledInstance(profile.getWidth(), profile.getHeight(), Image.SCALE_SMOOTH);
+	                //크기 자동 조절
+	                imageData = Files.readAllBytes(selectFile.toPath()); //이미지 파일 바이트코드로 변환.
+	                profile.setIcon(new ImageIcon(image)); //image 글씨 사진으로 변환.
+	                profile.setText("");
+
+	                
+	                
+	                } catch (Exception ex) {
+	                ex.printStackTrace();
+	            }
+		  }
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == joinButton) { // 회원가입버튼 클릭시.
+			join();
+		} else if (e.getSource() == proButton) { //파일 add 버튼 클릭시.
+			addProfile();
 		}
 	}
 }
-

@@ -67,6 +67,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 	Connection conn;                 
 
 	public AdminWindow(User user) {
+		conn = DbConnect.getConn().getDb(); //db 연동
 		thisUser = user;
 		
 		
@@ -522,7 +523,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 	private void sendNotice() { //공지사항 보내기.
 		String notice = noticeField.getText();
 		if(!notice.isEmpty()) {
-			conn = DbConnect.getConn().getDb();
+		
 			
 			sql = "INSERT INTO notice (notice_post) VALUES (?)";
 			try {
@@ -531,6 +532,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 				pstmt.executeUpdate();
 				
 				JOptionPane.showMessageDialog(null, "공지사항이 전송되었습니다.");
+				noticeField.setText("");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -544,7 +546,6 @@ public class AdminWindow extends JFrame implements ActionListener {
 	
 	public void getNotice() {
 		notice = new Notice();
-		conn = DbConnect.getConn().getDb();
 		
 		sql = "select notice_post, send_date from notice order by send_date desc limit 1";
 		try {

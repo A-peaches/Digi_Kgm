@@ -39,23 +39,11 @@ public class DigiMain {
 		
 		DigiMain main = new DigiMain();
 		main.placeFont();
+		//전역 폰트 설정
 		
-		User pipi = new User("pipi","1234","pipi");
-		User odeng = new User("odeng","1234","odeng");
-		User popo = new User("popo","1234","popo");
-		User admin = new User("admin","1234","admin");
-		ChatRoom b = new ChatRoom(14,"pipi,popo,odeng,");
-//		User b = new User("root","1234","admin");
-//
 
-//
-//		ChatRoomWindow ch = new ChatRoomWindow(a, b);
-//		new UserWindow(pipi);
-//		new UserWindow(odeng);
-//		new UserWindow(popo);
-//	
-//		new AdminWindow(admin);
 		new LoginWindow();
+		//user 초기 창 호출
 		
 	}
 	
