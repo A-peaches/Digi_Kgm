@@ -87,11 +87,6 @@ public class AdminWindow extends JFrame implements ActionListener {
 		JPanel chatListPanel = new JPanel();
 		JPanel settingPanel = new JPanel();
 
-		// 채팅방추가패널
-	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
-	    // 프레임의 아이콘으로 설정
-	    setIconImage(icon.getImage());
-	    
 	    
 		setupMemberListPanel(memberListPanel);
 		setupChatListPanel(chatListPanel);
@@ -105,12 +100,15 @@ public class AdminWindow extends JFrame implements ActionListener {
 
 	}
 
-	
+	//모든 회원 목록 불러오기
 	private void setupMemberListPanel(JPanel memberListPanel) {
-
+	    ImageIcon icon = new ImageIcon(getClass().getResource("/css/talk.png"));
+	    // 프레임의 아이콘으로 설정
+	    setIconImage(icon.getImage());
+	    
 		// 패널레이아웃설정
 		memberListPanel.setLayout(new BorderLayout());		
-		//채팅방 목록 가져오기
+		//회원 목록 가져오기
 		getMemberList();
 		
 		memberList = new JList<>(memberListModel);
@@ -233,7 +231,6 @@ public class AdminWindow extends JFrame implements ActionListener {
 
 	//회원목록 가져오기
 	private void getMemberList() {
-		conn = DbConnect.getConn().getDb();
 		memberListModel = new DefaultListModel<>();
 		
 		sql = "SELECT id,pw,nickname,photo,cut_off from user";
@@ -251,7 +248,7 @@ public class AdminWindow extends JFrame implements ActionListener {
 				
 
 				memberListModel.add(chatListModel.getSize(), user);
-				
+				//모든 회원 정보 가진 객체 생성 후 ListModel에 담기.
 			}		
 		}
 		catch(SQLException e) {
